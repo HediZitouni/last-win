@@ -14,7 +14,7 @@ function getFetchParams(method: string, body?: Object) {
   }
   return {
     ...fetchParams,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Access-Control-Allow-Headers": "x-requested-with" },
     body: JSON.stringify(body),
   };
 }
