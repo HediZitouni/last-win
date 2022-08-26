@@ -5,6 +5,6 @@ const HTTP_METHODS = {
   DELETE: "DELETE",
 };
 
-const API_ADRESS = "http://localhost:3000/";
+const API_ADRESS = "http://lastwinback-env.eba-5pq3gd8a.eu-west-3.elasticbeanstalk.com/";
 
 export { HTTP_METHODS, API_ADRESS };
