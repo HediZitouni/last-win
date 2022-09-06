@@ -5,6 +5,6 @@ const HTTP_METHODS = {
   DELETE: "DELETE",
 };
 
-const API_ADRESS = "https://otrom.fr/";
+const API_ADRESS = "https://otrom.fr/back/";
 
 export { HTTP_METHODS, API_ADRESS };
