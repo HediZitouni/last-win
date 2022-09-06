@@ -5,6 +5,6 @@ const HTTP_METHODS = {
   DELETE: "DELETE",
 };
 
-const API_ADRESS = "http://lastwinback-env.eba-5pq3gd8a.eu-west-3.elasticbeanstalk.com/";
+const API_ADRESS = "https://otrom.fr/";
 
 export { HTTP_METHODS, API_ADRESS };
