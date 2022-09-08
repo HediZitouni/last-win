@@ -1,9 +1,13 @@
-import { __retrieveDeviceId, __retrieveUserId, __storeDeviceId, __storeUserId } from '../users/users.store';
+import { __resetStore, __retrieveDeviceId, __retrieveUserId, __retrieveVersion, __storeDeviceId, __storeUserId } from '../users/users.store';
 import { getUniqueId } from 'react-native-device-info';
 import { v4 as uuidv4 } from 'uuid';
 import { getOrCreateUser, getUserById } from '../users/users.service';
+import { storeVersion } from '../../utils/constants';
 
 async function setupUser() {
+	const version = await __retrieveVersion();
+	if (version !== storeVersion) await __resetStore();
+
 	let [userId, deviceId] = await Promise.all([__retrieveUserId(), __retrieveDeviceId()]);
 	if (!deviceId) {
 		deviceId = await getOrCreateDeviceId();
