@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { background_grey } from '../../utils/common-styles';
 import { getUsers } from '../users/users.service';
 import { User } from '../users/users.type';
@@ -18,18 +18,20 @@ const Board = () => {
 	}, []);
 	return (
 		<View style={styles.board_container}>
-			{users.map((user) => {
-				return (
-					<View style={styles.board_item} key={user.id}>
-						<View style={styles.board_item_name}>
-							<Text>{user.name}</Text>
+			<ScrollView>
+				{users.map((user, index) => {
+					return (
+						<View style={styles.board_item} key={index}>
+							<View style={styles.board_item_name}>
+								<Text>{user.name}</Text>
+							</View>
+							<View style={styles.board_item_score}>
+								<Text>{user.score}</Text>
+							</View>
 						</View>
-						<View style={styles.board_item_score}>
-							<Text>{user.score}</Text>
-						</View>
-					</View>
-				);
-			})}
+					);
+				})}
+			</ScrollView>
 		</View>
 	);
 };
@@ -38,8 +40,6 @@ const styles = StyleSheet.create({
 	board_container: {
 		flex: 9,
 		backgroundColor: background_grey,
-		justifyContent: 'center',
-		alignItems: 'center',
 	},
 	board_item: {
 		width: '100%',
