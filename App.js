@@ -4,10 +4,10 @@ import Footer from './components/footer/footer.component';
 import { setupUser } from './components/init/init.lib';
 import MainView from './components/main-view/main-view.component';
 import { __retrieveDeviceId, __retrieveUserId, __storeUserId } from './components/users/users.store';
-import { initUser } from './components/users/users.type';
+
 export default function App() {
 	const [indexView, setIndexView] = useState(0);
-	const [user, setUser] = useState(initUser);
+	const [user, setUser] = useState(null);
 
 	useEffect(() => {
 		setupUser()
@@ -20,10 +20,12 @@ export default function App() {
 	}, []);
 
 	return (
-		<SafeAreaView style={styles.container}>
-			<MainView indexView={indexView} user={user} setUser={setUser}></MainView>
-			<Footer setIndexView={setIndexView} />
-		</SafeAreaView>
+		user && (
+			<SafeAreaView style={styles.container}>
+				<MainView indexView={indexView} user={user} setUser={setUser}></MainView>
+				<Footer setIndexView={setIndexView} />
+			</SafeAreaView>
+		)
 	);
 }
 
