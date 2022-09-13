@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { background_grey } from '../../utils/common-styles';
+import { background_grey, last_green } from '../../utils/common-styles';
 import { getUsers } from '../users/users.service';
 import { User } from '../users/users.type';
 
@@ -21,7 +21,7 @@ const Board = () => {
 			<ScrollView>
 				{users.map((user, index) => {
 					return (
-						<View style={styles.board_item} key={index}>
+						<View style={[styles.board_item, user.isLast ? styles.board_item_last : null]} key={index}>
 							<View style={styles.board_item_name}>
 								<Text>{user.name}</Text>
 							</View>
@@ -49,6 +49,9 @@ const styles = StyleSheet.create({
 		marginBottom: 5,
 		borderBottomWidth: 1,
 		borderTopWidth: 1,
+	},
+	board_item_last: {
+		backgroundColor: last_green,
 	},
 	board_item_name: {
 		flex: 1,
