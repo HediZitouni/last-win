@@ -1,3 +1,5 @@
+import { Game } from '../games/games.type';
+
 interface User {
 	id: string;
 	deviceId: string;

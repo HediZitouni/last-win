@@ -3,20 +3,16 @@ import { StyleSheet, View, Button } from 'react-native';
 import { button_grey, footer_grey } from '../../utils/common-styles';
 
 const Footer = ({ setIndexView }) => {
-	function handleClick(indexView) {
-		setIndexView(indexView);
-	}
-
 	return (
 		<View style={styles.footer}>
 			<View style={styles.footer_item_1}>
-				<Button title="Last" color={button_grey} onPress={() => handleClick(0)}></Button>
+				<Button title="Last" color={button_grey} onPress={() => setIndexView(0)}></Button>
 			</View>
 			<View style={styles.footer_item_2}>
-				<Button title="Board" color={button_grey} onPress={() => handleClick(1)}></Button>
+				<Button title="Board" color={button_grey} onPress={() => setIndexView(1)}></Button>
 			</View>
 			<View style={styles.footer_item_3}>
-				<Button title="Settings" color={button_grey} onPress={() => handleClick(2)}></Button>
+				<Button title="Settings" color={button_grey} onPress={() => setIndexView(2)}></Button>
 			</View>
 		</View>
 	);
