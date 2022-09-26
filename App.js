@@ -6,7 +6,7 @@ import MainView from './components/main-view/main-view.component';
 import { __retrieveDeviceId, __retrieveUserId, __storeUserId } from './components/users/users.store';
 
 export default function App() {
-	const [indexView, setIndexView] = useState();
+	const [viewData, setViewData] = useState({ index: 4 });
 	const [user, setUser] = useState(null);
 
 	useEffect(() => {
@@ -22,8 +22,8 @@ export default function App() {
 	return (
 		user && (
 			<SafeAreaView style={styles.container}>
-				<MainView indexView={indexView} user={user} setUser={setUser} setIndexView={setIndexView}></MainView>
-				<Footer setIndexView={setIndexView} />
+				<MainView viewData={viewData} user={user} setUser={setUser} setViewData={setViewData}></MainView>
+				<Footer setViewData={setViewData} />
 			</SafeAreaView>
 		)
 	);

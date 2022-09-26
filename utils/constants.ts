@@ -3,6 +3,7 @@ const HTTP_METHODS = {
 	POST: 'POST',
 	PUT: 'PUT',
 	DELETE: 'DELETE',
+	PATCH: 'PATCH',
 };
 
 //const API_ADRESS = 'https://otrom.fr/back/';

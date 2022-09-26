@@ -6,9 +6,9 @@ import StyledPressable from '../pressable/pressable.component';
 
 interface GameMenuProps {
 	games: Game[];
-	setIndexView: Function;
+	setViewData: Function;
 }
-const GameMenu = ({ games, setIndexView }: GameMenuProps) => {
+const GameMenu = ({ games, setViewData }: GameMenuProps) => {
 	return (
 		<View style={styles.game_menu_view_container}>
 			<View style={styles.game_menu_left_container}>
@@ -24,7 +24,7 @@ const GameMenu = ({ games, setIndexView }: GameMenuProps) => {
 			<View style={styles.game_menu_right_container}>
 				<StyledPressable
 					onPressFunction={() => {
-						setIndexView(4);
+						setViewData({ index: 3 });
 					}}
 					defaultStyle={styles.game_menu_right_item}
 					pressedStyle={styles.pressed_game_menu_right_item}
