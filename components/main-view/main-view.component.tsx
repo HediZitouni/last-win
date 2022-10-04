@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Board from '../board/board';
 import ButtonLast from '../button-last/button-last.component';
 import GameCreation from '../game-creation/game-creation.component';
+import GameJoin from '../game-join/game-join.component';
 import GameMenu from '../game-menu/game-menu.component';
 import GameView from '../game/game.component';
 import { getGame } from '../game/game.service';
@@ -48,8 +49,10 @@ const MainView = ({ viewData, user, setUser, setViewData }: MainViewArguments) =
 			return <GameCreation setViewData={setViewData}></GameCreation>;
 		case 5:
 			return <GameView game={game} setViewData={setViewData}></GameView>;
+		case 6:
+			return <GameJoin setViewData={setViewData}></GameJoin>;
 		default:
-			return <GameCreation setViewData={setViewData}></GameCreation>;
+			return <GameJoin setViewData={setViewData}></GameJoin>;
 	}
 };
 export default MainView;

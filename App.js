@@ -6,7 +6,7 @@ import MainView from './components/main-view/main-view.component';
 import { __retrieveDeviceId, __retrieveUserId, __storeUserId } from './components/users/users.store';
 
 export default function App() {
-	const [viewData, setViewData] = useState({ index: 4 });
+	const [viewData, setViewData] = useState({ index: 6 });
 	const [user, setUser] = useState(null);
 
 	useEffect(() => {

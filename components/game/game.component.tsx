@@ -37,23 +37,41 @@ const GameView = ({ setViewData, game }: GameProps) => {
 	return game ? (
 		<View style={styles.game_container}>
 			<View style={styles.game_name_container}>
-				<Text>{game.name}</Text>
+				<Text>
+					{game.name} - {game.hashtag}
+				</Text>
 			</View>
 			<View style={styles.game_content_container}>
 				<View style={styles.players_container}>
-					<Text>Players</Text>
+					<Text style={styles.title}>Players</Text>
 					{game.users.map((user, index) => {
 						return (
-							<View key={index}>
+							<View style={styles.user_item} key={index}>
 								<Text>{user.idUser}</Text>
+								<View style={[styles.ready_box, user.ready ? styles.ready : styles.not_ready]}></View>
 							</View>
 						);
 					})}
 				</View>
 				<View style={styles.rules_container}>
-					<Text>Rules</Text>
+					<Text style={styles.title}>Rules</Text>
 					<View style={styles.rule}>
-						<Text></Text>
+						<Text>Credits: {game.credits}</Text>
+					</View>
+					<View style={styles.rule}>
+						<Text style={game.blind ? styles.ready : styles.not_ready}>Blind: {game.blind}</Text>
+					</View>
+					<View style={styles.rule}>
+						<Text>Maximum players: {game.maxPlayers}</Text>
+					</View>
+					<View style={styles.rule}>
+						<Text>Duration(minutes): {game.time}</Text>
+					</View>
+					<View style={styles.rule}>
+						<Text>Credits: {game.credits}</Text>
+					</View>
+					<View style={styles.rule}>
+						<Text>Credits: {game.credits}</Text>
 					</View>
 				</View>
 			</View>
@@ -79,18 +97,28 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	game_name_container: {
-		flex: 2,
+		flex: 1,
+		textAlign: 'center',
+		justifyContent: 'center',
+		width: '100%',
 	},
 	game_content_container: {
 		flex: 8,
 		display: 'flex',
 		flexDirection: 'row',
+		width: '100%',
 	},
 	players_container: {
 		flex: 1,
+		backgroundColor: 'orange',
+		paddingLeft: '5px',
+		paddingRight: '5px',
 	},
 	rules_container: {
 		flex: 1,
+		backgroundColor: 'cyan',
+		paddingLeft: '5px',
+		paddingRight: '5px',
 	},
 	rule: {
 		backgroundColor: 'yellow',
@@ -102,9 +130,31 @@ const styles = StyleSheet.create({
 		textTransform: 'uppercase',
 		borderRadius: 2,
 		textAlign: 'center',
+		marginTop: '5px',
+		marginBottom: '5px',
 	},
 	button_pressed: {
 		backgroundColor: button_grey_press,
+	},
+	title: {
+		textAlign: 'center',
+		paddingTop: '5px',
+		paddingBottom: '5px',
+	},
+	user_item: {
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		marginBottom: '2px',
+	},
+	ready_box: {
+		width: '30px',
+	},
+	ready: {
+		backgroundColor: 'green',
+	},
+	not_ready: {
+		backgroundColor: 'red',
 	},
 });
 
