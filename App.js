@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, SafeAreaView } from 'react-native';
 import Footer from './components/footer/footer.component';
 import { setupUser } from './components/init/init.lib';

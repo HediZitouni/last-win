@@ -7,16 +7,59 @@ import { button_grey, button_grey_press } from '../../utils/common-styles';
 import { __retrieveUserId } from '../users/users.store';
 import { launchGame } from './game.service';
 import { setUserReady } from '../users/users.service';
+import { WebSocketMessage, UserReadyContent } from '../../utils/websocket/websocket.types';
 
 interface GameProps {
 	setViewData: Function;
 	game: Game;
+	setGame: Function;
 }
 
-const GameView = ({ setViewData, game }: GameProps) => {
+const GameView = ({ setViewData, game, setGame }: GameProps) => {
 	const [idUser, setIdUser] = useState<string>();
-
+	const ws = new WebSocket('ws://localhost:3000/');
+	ws.onopen = () => {
+		console.log('open');
+		ws.send(JSON.stringify({ message: 'setupUser', content: { idUser } }));
+	};
+	ws.onclose = (e) => {
+		console.log('close');
+	};
+	ws.onerror = (e) => {
+		console.log('error', e);
+	};
+	ws.onmessage = (e) => {
+		const { message, content } = JSON.parse(e.data.toString());
+		switch (message) {
+			case 'userReady':
+				console.log('ws event', message, content, game, setGame);
+				if (game && content) {
+					if (game.users && game.users.find(({ idUser }) => idUser === content.idUser)) {
+						setGame((prevGame) => {
+							const newGame = { ...prevGame };
+							const newUserReady = newGame.users.find(({ idUser }) => idUser === content.idUser);
+							if (newUserReady) newUserReady.ready = true;
+							console.log(newGame.users, newGame);
+							return newGame;
+						});
+					} else if (game.users && !game.users.find(({ idUser }) => idUser === content.idUser)) {
+						setGame((prevGame) => {
+							const newGame = { ...prevGame };
+							newGame.users.push({ idUser: content.idUser, ready: content.ready });
+							console.log(newGame.users, newGame);
+							return newGame;
+						});
+					}
+				}
+				break;
+			default:
+				console.log(`${message} not known as ws event`);
+				break;
+		}
+	};
+	console.log('game start', game);
 	useEffect(() => {
+		console.log('inUseEffect', game);
 		__retrieveUserId()
 			.then((id) => {
 				setIdUser(id);
@@ -79,7 +122,7 @@ const GameView = ({ setViewData, game }: GameProps) => {
 			<StyledPressable
 				defaultStyle={styles.button_default}
 				pressedStyle={styles.button_pressed}
-				text={game.idOwner === idUser ? 'Ready' : 'Launch Game'}
+				text={game.idOwner === idUser ? 'Launch Game' : 'Ready'}
 				onPressFunction={game.idOwner === idUser ? onLaunchClick : onUserReadyClick}
 			></StyledPressable>
 		</View>
