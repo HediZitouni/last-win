@@ -53,7 +53,7 @@ const GameView = ({ setViewData, game, setGame }: GameProps) => {
         }
         break;
       case "gameStarted":
-        setViewData({ index: 0 });
+        setViewData({ index: 0, props: { idGame: game.id } });
         break;
       default:
         console.log(`${message} not known as ws event`);

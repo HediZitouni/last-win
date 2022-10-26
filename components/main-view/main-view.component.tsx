@@ -6,7 +6,7 @@ import GameJoin from "../game-join/game-join.component";
 import GameMenu from "../game-menu/game-menu.component";
 import GameView from "../game/game.component";
 import { getGame } from "../game/game.service";
-import { Game, gamesMock } from "../games/games.type";
+import { Game } from "../games/games.type";
 import UserInput from "../user-input/user-input.component";
 import { User } from "../users/users.type";
 
@@ -38,13 +38,13 @@ const MainView = ({ viewData, user, setUser, setViewData }: MainViewArguments) =
   }, [viewData?.props?.idGame]);
   switch (viewData.index) {
     case 0:
-      return <ButtonLast user={user} />;
+      return <ButtonLast user={user} game={game} />;
     case 1:
       return <Board />;
     case 2:
       return <UserInput name={user.name} setUser={setUser} />;
     case 3:
-      return <GameMenu games={gamesMock} setViewData={setViewData}></GameMenu>;
+      return <GameMenu games={user.games} setViewData={setViewData}></GameMenu>;
     case 4:
       return <GameCreation setViewData={setViewData}></GameCreation>;
     case 5:
