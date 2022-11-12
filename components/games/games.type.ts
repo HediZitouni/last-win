@@ -7,7 +7,7 @@ export interface Game {
   blind: boolean;
   maxPlayers: number; // To avoid bots
   idOwner: string;
-  users?: UserReady[];
+  users?: UserInGame[];
   last: Last;
 }
 
@@ -25,7 +25,9 @@ export interface GameInput {
   idOwner?: string;
 }
 
-interface UserReady {
+interface UserInGame {
   idUser: string;
   ready: boolean;
+  credit: number;
+  score: number;
 }
