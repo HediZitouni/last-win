@@ -10,35 +10,14 @@ import { User } from "../users/users.type";
 interface ButtonLastProperties {
   user: User;
   game: Game;
+  ws: WebSocket;
 }
-const ButtonLast = ({ user, game }: ButtonLastProperties) => {
+const ButtonLast = ({ user, game, ws: initWebsocket }: ButtonLastProperties) => {
   const [{ id: idUser, name }, setUser] = React.useState<User | null>(user);
   const [{ id: idGame, last }, setGame] = React.useState<Game | null>(game);
   const [{ credit, score }, setUserInGame] = React.useState(game.users?.find((u) => u.idUser === idUser));
   const [triggerRefresh, setTriggerRefresh] = React.useState<boolean>(false);
-
-  const ws = new WebSocket("ws://localhost:3000/");
-  ws.onopen = () => {
-    console.log("open");
-    ws.send(JSON.stringify({ message: "setupUser", content: { idUser } }));
-  };
-  ws.onclose = (e) => {
-    console.log("close");
-  };
-  ws.onerror = (e) => {
-    console.log("error", e);
-  };
-  ws.onmessage = (e) => {
-    const { message } = JSON.parse(e.data.toString());
-    switch (message) {
-      case "lastChanged":
-        setTriggerRefresh(!triggerRefresh);
-        break;
-      default:
-        console.log(`${message} not known as ws event`);
-        break;
-    }
-  };
+  const [ws, setWebSocket] = React.useState(initWebsocket);
 
   useEffect(() => {
     getUserById(idUser)
@@ -56,6 +35,20 @@ const ButtonLast = ({ user, game }: ButtonLastProperties) => {
       .catch((error) => {
         console.log(error);
       });
+    setWebSocket((lastWs) => {
+      lastWs.onmessage = (e) => {
+        const { message } = JSON.parse(e.data.toString());
+        switch (message) {
+          case "lastChanged":
+            setTriggerRefresh(!triggerRefresh);
+            break;
+          default:
+            console.log(`${message} not known as ws event`);
+            break;
+        }
+      };
+      return lastWs;
+    });
   }, [triggerRefresh]);
 
   async function addCount() {

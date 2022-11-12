@@ -13,7 +13,7 @@ const GameMenu = ({ games, setViewData }: GameMenuProps) => {
     <View style={styles.game_menu_view_container}>
       <View style={styles.game_menu_left_container}>
         {games ? (
-          games.map((game, index) => {
+          games.map((game, key) => {
             return (
               <StyledPressable
                 onPressFunction={() => {
@@ -22,6 +22,7 @@ const GameMenu = ({ games, setViewData }: GameMenuProps) => {
                 defaultStyle={styles.game_menu_left_item}
                 pressedStyle={styles.pressed_game_menu_left_item}
                 text={game}
+                key={key}
               ></StyledPressable>
             );
           })

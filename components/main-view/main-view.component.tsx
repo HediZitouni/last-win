@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Text, View } from "react-native";
 import Board from "../board/board";
 import ButtonLast from "../button-last/button-last.component";
 import GameCreation from "../game-creation/game-creation.component";
@@ -25,9 +26,10 @@ interface MainViewArguments {
   setUser: any;
   setViewData: Function;
   idGame?: string;
+  ws: WebSocket;
 }
 
-const MainView = ({ viewData, user, setUser, setViewData }: MainViewArguments) => {
+const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArguments) => {
   const [game, setGame] = useState<Game>();
 
   useEffect(() => {
@@ -38,7 +40,7 @@ const MainView = ({ viewData, user, setUser, setViewData }: MainViewArguments) =
   }, [viewData?.props?.idGame]);
   switch (viewData.index) {
     case 0:
-      return <ButtonLast user={user} game={game} />;
+      return <ButtonLast ws={ws} user={user} game={game} />;
     case 1:
       return <Board />;
     case 2:
@@ -48,11 +50,21 @@ const MainView = ({ viewData, user, setUser, setViewData }: MainViewArguments) =
     case 4:
       return <GameCreation setViewData={setViewData}></GameCreation>;
     case 5:
-      return <GameView game={game} setGame={setGame} setViewData={setViewData}></GameView>;
+      return isReady([user, game]) ? (
+        <GameView ws={ws} user={user} game={game} setGame={setGame} setViewData={setViewData}></GameView>
+      ) : (
+        <View>
+          <Text>LOADER</Text>
+        </View>
+      );
     case 6:
       return <GameJoin setViewData={setViewData}></GameJoin>;
     default:
       return <GameJoin setViewData={setViewData}></GameJoin>;
   }
 };
+
+function isReady(params: unknown[]) {
+  return params.every((param) => param !== undefined);
+}
 export default MainView;
