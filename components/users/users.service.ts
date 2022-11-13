@@ -4,8 +4,8 @@ import { User } from "./users.type";
 import { __retrieveDeviceId, __retrieveUserId, __storeDeviceId } from "./users.store";
 import { UserData } from "../user-input/user-input.type";
 
-async function getUsers(): Promise<User[]> {
-  const response = await callApi(HTTP_METHODS.GET, "users");
+async function getUsers(idGame: string): Promise<User[]> {
+  const response = await callApi(HTTP_METHODS.GET, "users", undefined, [["idGame", idGame]]);
   const users: User[] = await response.json();
   return users;
 }

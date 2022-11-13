@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, SafeAreaView, View, Text } from "react-native";
-import Footer from "./components/footer/footer.component";
+import Header from "./components/header/header.component";
 import { setupUser } from "./components/init/init.lib";
 import MainView from "./components/main-view/main-view.component";
 import { __retrieveDeviceId, __retrieveUserId, __storeUserId } from "./components/users/users.store";
@@ -36,8 +36,8 @@ export default function App() {
 
   return user && ws ? (
     <SafeAreaView style={styles.container}>
+      <Header setViewData={setViewData}></Header>
       <MainView ws={ws} viewData={viewData} user={user} setUser={setUser} setViewData={setViewData}></MainView>
-      <Footer setViewData={setViewData} />
     </SafeAreaView>
   ) : (
     <View>

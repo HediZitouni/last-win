@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import Board from "../board/board";
 import ButtonLast from "../button-last/button-last.component";
 import GameCreation from "../game-creation/game-creation.component";
 import GameJoin from "../game-join/game-join.component";
@@ -40,9 +39,13 @@ const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArgument
   }, [viewData?.props?.idGame]);
   switch (viewData.index) {
     case 0:
-      return <ButtonLast ws={ws} user={user} game={game} />;
-    case 1:
-      return <Board />;
+      return isReady([ws, user, game]) ? (
+        <ButtonLast ws={ws} user={user} game={game} setViewData={setViewData} />
+      ) : (
+        <View>
+          <Text>LOADER</Text>
+        </View>
+      );
     case 2:
       return <UserInput name={user.name} setUser={setUser} />;
     case 3:
