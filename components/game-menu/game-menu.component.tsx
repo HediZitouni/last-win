@@ -1,14 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, View, Button, Text, Pressable } from "react-native";
 import { button_grey, footer_grey } from "../../utils/common-styles";
 import { Game } from "../games/games.type";
+import { setupUser } from "../init/init.lib";
 import StyledPressable from "../pressable/pressable.component";
+import { User } from "../users/users.type";
 
 interface GameMenuProps {
-  games: string[];
+  user: User;
   setViewData: Function;
 }
-const GameMenu = ({ games, setViewData }: GameMenuProps) => {
+const GameMenu = ({ user: initUser, setViewData }: GameMenuProps) => {
+  const [{ games }, setUser] = React.useState(initUser);
+
+  useEffect(() => {
+    setupUser().then((u) => {
+      setUser(u);
+    });
+  }, []);
+
   return (
     <View style={styles.game_menu_view_container}>
       <View style={styles.game_menu_left_container}>
@@ -17,17 +27,19 @@ const GameMenu = ({ games, setViewData }: GameMenuProps) => {
             return (
               <StyledPressable
                 onPressFunction={() => {
-                  setViewData({ index: 0, props: { idGame: game } });
+                  setViewData({ index: 0, props: { idGame: game.id } });
                 }}
                 defaultStyle={styles.game_menu_left_item}
                 pressedStyle={styles.pressed_game_menu_left_item}
-                text={game}
+                text={game.name || "no name game"}
                 key={key}
               ></StyledPressable>
             );
           })
         ) : (
-          <View>No current games</View>
+          <View>
+            <Text>No current games</Text>
+          </View>
         )}
       </View>
       <View style={styles.game_menu_middle_container}></View>

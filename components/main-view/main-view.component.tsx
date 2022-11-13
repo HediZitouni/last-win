@@ -49,7 +49,7 @@ const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArgument
     case 2:
       return <UserInput name={user.name} setUser={setUser} />;
     case 3:
-      return <GameMenu games={user.games} setViewData={setViewData}></GameMenu>;
+      return <GameMenu user={user} setViewData={setViewData}></GameMenu>;
     case 4:
       return <GameCreation setViewData={setViewData}></GameCreation>;
     case 5:

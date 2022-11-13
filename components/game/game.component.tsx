@@ -21,7 +21,7 @@ interface GameProps {
 const GameView = ({ setViewData, game, setGame, user: { id: idUser }, ws: initialWebsocket }: GameProps) => {
   const [ws, setWebSocket] = useState(initialWebsocket);
 
-  console.log("game start", game);
+  console.log("game start", idUser, game);
   useEffect(() => {
     console.log("inUseEffect", game);
     setWebSocket((lastWs) => {

@@ -1,3 +1,5 @@
+import { Game } from "../games/games.type";
+
 export interface User {
   id: string;
   deviceId: string;
@@ -5,5 +7,5 @@ export interface User {
   score: number;
   credit: number;
   isLast?: boolean;
-  games: string[];
+  games: Game[];
 }
