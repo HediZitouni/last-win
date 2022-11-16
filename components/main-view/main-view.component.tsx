@@ -61,9 +61,9 @@ const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArgument
         </View>
       );
     case 6:
-      return <GameJoin setViewData={setViewData}></GameJoin>;
+      return <GameJoin setViewData={setViewData} user={user}></GameJoin>;
     default:
-      return <GameJoin setViewData={setViewData}></GameJoin>;
+      return <GameJoin setViewData={setViewData} user={user}></GameJoin>;
   }
 };
 
