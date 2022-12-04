@@ -34,14 +34,14 @@ export default function App() {
       });
   }, []);
 
-  return user && ws ? (
+  return user && user.id && ws ? (
     <SafeAreaView style={styles.container}>
       <Header setViewData={setViewData}></Header>
       <MainView ws={ws} viewData={viewData} user={user} setUser={setUser} setViewData={setViewData}></MainView>
     </SafeAreaView>
   ) : (
     <View>
-      <Text>LOADING</Text>
+      <Text>LOADING APP</Text>
     </View>
   );
 }

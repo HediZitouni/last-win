@@ -21,29 +21,24 @@ interface GameProps {
 const GameView = ({ setViewData, game, setGame, user: { id: idUser }, ws: initialWebsocket }: GameProps) => {
   const [ws, setWebSocket] = useState(initialWebsocket);
 
-  console.log("game start", idUser, game);
   useEffect(() => {
-    console.log("inUseEffect", game);
     setWebSocket((lastWs) => {
       lastWs.onmessage = (e) => {
         const { message, content } = JSON.parse(e.data.toString());
         switch (message) {
           case "userReady":
-            console.log("ws event", message, content, game, setGame);
             if (game && content) {
               if (game.users && game.users.find(({ idUser }) => idUser === content.idUser)) {
                 setGame((prevGame) => {
                   const newGame = { ...prevGame };
                   const newUserReady = newGame.users.find(({ idUser }) => idUser === content.idUser);
                   if (newUserReady) newUserReady.ready = true;
-                  console.log(newGame.users, newGame);
                   return newGame;
                 });
               } else if (game.users && !game.users.find(({ idUser }) => idUser === content.idUser)) {
                 setGame((prevGame) => {
                   const newGame = { ...prevGame };
                   newGame.users.push({ idUser: content.idUser, ready: content.ready });
-                  console.log(newGame.users, newGame);
                   return newGame;
                 });
               }
@@ -79,7 +74,7 @@ const GameView = ({ setViewData, game, setGame, user: { id: idUser }, ws: initia
     return game.users?.some(({ ready }) => !ready);
   }
 
-  return game ? (
+  return game && idUser ? (
     <View style={styles.game_container}>
       <View style={styles.game_name_container}>
         <Text>

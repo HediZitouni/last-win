@@ -9,6 +9,8 @@ export interface Game {
   idOwner: string;
   users?: UserInGame[];
   last: Last;
+  startedAt?: string;
+  endedAt?: string;
 }
 
 interface Last {

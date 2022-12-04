@@ -59,7 +59,7 @@ const Board = ({ game: { id: idGame, users, last }, ws: initWebsocket }: BoardPr
     </>
   ) : (
     <View>
-      <Text>Loading</Text>
+      <Text>Loading BOARD</Text>
     </View>
   );
 };

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import { background_grey, button_grey, button_grey_press } from "../../utils/common-styles";
 import Board from "../board/board";
+import Clock from "../clock/clock.component";
 import { getGame } from "../game/game.service";
 import { Game } from "../games/games.type";
 import { getUserById, setLast } from "../users/users.service";
@@ -19,6 +20,7 @@ const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: Bu
   const [game, setGame] = React.useState<Game | null>(initGame);
   const [{ credit, score }, setUserInGame] = React.useState(game.users?.find((u) => u.idUser === idUser));
   const [triggerRefresh, setTriggerRefresh] = React.useState<boolean>(false);
+  const [triggerScoreRefresh, setTriggerScoreRefresh] = React.useState<boolean>(false);
   const [ws, setWebSocket] = React.useState(initWebsocket);
   const { id: idGame, last } = game;
   useEffect(() => {
@@ -53,6 +55,17 @@ const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: Bu
     });
   }, [triggerRefresh]);
 
+  useEffect(() => {
+    if (isLast() && Math.round(Date.now() / 1000) < +game.endedAt) {
+      setUserInGame((prev) => {
+        const newScore = prev.score + 1;
+        const currUser = game.users?.find((u) => u.idUser === idUser);
+        if (currUser) currUser.score = newScore;
+        return { ...prev, score: newScore };
+      });
+    }
+  }, [triggerScoreRefresh]);
+
   async function addCount() {
     await setLast(idGame, idUser);
     setTriggerRefresh((prev) => !prev);
@@ -68,7 +81,14 @@ const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: Bu
         <Pressable style={styles.name_container} onPress={() => setViewData({ index: 2 })}>
           <Text style={styles.name_text}>{name}</Text>
         </Pressable>
-        <View style={styles.placeholder_4}></View>
+        <View style={styles.clock_container}>
+          <Clock
+            startedAt={+game.startedAt}
+            minutes={game.time}
+            setTriggerScoreRefresh={setTriggerScoreRefresh}
+          ></Clock>
+        </View>
+        <View style={styles.placeholder_2}></View>
         <View style={styles.score_container}>
           <Text>{score} Pts</Text>
         </View>
@@ -91,7 +111,7 @@ const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: Bu
     </View>
   ) : (
     <View>
-      <Text>Loading</Text>
+      <Text>Loading BUTTON LAST</Text>
     </View>
   );
 };
@@ -126,6 +146,7 @@ const styles = StyleSheet.create({
   header: { flex: 1, flexDirection: "row", width: "100%", alignItems: "center" },
   board_container: { flex: 8, width: "100%" },
   game_name_container: { flex: 1, justifyContent: "center" },
+  clock_container: { flex: 2 },
 });
 
 const styleOnPress = (pressed) => ({

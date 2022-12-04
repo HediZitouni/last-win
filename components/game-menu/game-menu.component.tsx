@@ -27,7 +27,11 @@ const GameMenu = ({ user: initUser, setViewData }: GameMenuProps) => {
             return (
               <StyledPressable
                 onPressFunction={() => {
-                  setViewData({ index: 0, props: { idGame: game.id } });
+                  if (game.startedAt) {
+                    setViewData({ index: 0, props: { idGame: game.id } });
+                  } else {
+                    setViewData({ index: 5, props: { idGame: game.id } });
+                  }
                 }}
                 defaultStyle={styles.game_menu_left_item}
                 pressedStyle={styles.pressed_game_menu_left_item}

@@ -36,7 +36,13 @@ const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArgument
       getGame(viewData?.props?.idGame)
         .then((game) => setGame(game))
         .catch((error) => console.log(error));
-  }, [viewData?.props?.idGame]);
+  }, [viewData?.props?.idGame, user, ws]);
+  if (!isReady([user, user?.id, ws]))
+    return (
+      <View>
+        <Text>LOADING MAIN VIEW</Text>
+      </View>
+    );
   switch (viewData.index) {
     case 0:
       return isReady([ws, user, game]) ? (
@@ -47,7 +53,7 @@ const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArgument
         </View>
       );
     case 2:
-      return <UserInput name={user.name} setUser={setUser} />;
+      return <UserInput name={user.name} setUser={setUser} setViewData={setViewData} />;
     case 3:
       return <GameMenu user={user} setViewData={setViewData}></GameMenu>;
     case 4:
