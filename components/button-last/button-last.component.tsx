@@ -4,25 +4,24 @@ import { background_grey, button_grey, button_grey_press } from "../../utils/com
 import Board from "../board/board";
 import Clock from "../clock/clock.component";
 import { getGame } from "../game/game.service";
-import { Game } from "../games/games.type";
+import { Game, UserInGame } from "../games/games.type";
 import { getUserById, setLast } from "../users/users.service";
 import { __retrieveUserId, __storeUserId } from "../users/users.store";
 import { User } from "../users/users.type";
 
 interface ButtonLastProperties {
   user: User;
-  game: Game;
+  idGame: string;
   ws: WebSocket;
   setViewData: Function;
 }
-const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: ButtonLastProperties) => {
+const ButtonLast = ({ user, ws: initWebsocket, setViewData, idGame }: ButtonLastProperties) => {
   const [{ id: idUser, name }, setUser] = React.useState<User | null>(user);
-  const [game, setGame] = React.useState<Game | null>(initGame);
-  const [{ credit, score }, setUserInGame] = React.useState(game.users?.find((u) => u.idUser === idUser));
+  const [game, setGame] = React.useState<Game | null>();
+  const [uig, setUserInGame] = React.useState<UserInGame>();
   const [triggerRefresh, setTriggerRefresh] = React.useState<boolean>(false);
   const [triggerScoreRefresh, setTriggerScoreRefresh] = React.useState<boolean>(false);
   const [ws, setWebSocket] = React.useState(initWebsocket);
-  const { id: idGame, last } = game;
   useEffect(() => {
     getUserById(idUser)
       .then((user) => {
@@ -32,9 +31,9 @@ const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: Bu
         console.log(error);
       });
     getGame(idGame)
-      .then((game) => {
-        setGame(game);
-        setUserInGame(game.users?.find((u) => u.idUser === idUser));
+      .then((loadedGame) => {
+        setGame(loadedGame);
+        setUserInGame(loadedGame.users?.find((u) => u.idUser === idUser));
       })
       .catch((error) => {
         console.log(error);
@@ -56,13 +55,23 @@ const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: Bu
   }, [triggerRefresh]);
 
   useEffect(() => {
-    if (isLast() && Math.round(Date.now() / 1000) < +game.endedAt) {
-      setUserInGame((prev) => {
-        const newScore = prev.score + 1;
-        const currUser = game.users?.find((u) => u.idUser === idUser);
-        if (currUser) currUser.score = newScore;
-        return { ...prev, score: newScore };
+    if (!game) return;
+    if (Math.round(Date.now() / 1000) < +game.endedAt) {
+      setGame((prev) => {
+        const last = game.users?.find((u) => u.idUser === prev.last.idUser);
+        if (!last) return prev;
+        const newScore = last.score + 1;
+        last.score = newScore;
+        return prev;
       });
+      if (isLast()) {
+        setUserInGame((prev) => {
+          const newScore = prev.score + 1;
+          const currUser = game.users?.find((u) => u.idUser === idUser);
+          if (currUser) currUser.score = newScore;
+          return { ...prev, score: newScore };
+        });
+      }
     }
   }, [triggerScoreRefresh]);
 
@@ -72,10 +81,10 @@ const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: Bu
   }
 
   function isLast() {
-    return idUser === last.idUser;
+    return idUser === game.last.idUser;
   }
 
-  return user ? (
+  return user && game && ws && uig ? (
     <View style={styles.last_button_view_container}>
       <View style={styles.header}>
         <Pressable style={styles.name_container} onPress={() => setViewData({ index: 2 })}>
@@ -90,10 +99,10 @@ const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: Bu
         </View>
         <View style={styles.placeholder_2}></View>
         <View style={styles.score_container}>
-          <Text>{score} Pts</Text>
+          <Text>{uig.score} Pts</Text>
         </View>
         <View style={styles.credit_container}>
-          <Text>{credit} Credits</Text>
+          <Text>{uig.credit} Credits</Text>
         </View>
       </View>
       <View style={styles.game_name_container}>
@@ -106,7 +115,7 @@ const ButtonLast = ({ user, game: initGame, ws: initWebsocket, setViewData }: Bu
         </Pressable>
       </View>
       <View style={styles.board_container}>
-        <Board game={game} ws={ws}></Board>
+        <Board game={game}></Board>
       </View>
     </View>
   ) : (

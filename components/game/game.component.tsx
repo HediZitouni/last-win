@@ -5,56 +5,63 @@ import { Game } from "../games/games.type";
 import StyledPressable from "../pressable/pressable.component";
 import { button_grey, button_grey_press } from "../../utils/common-styles";
 import { __retrieveUserId } from "../users/users.store";
-import { launchGame } from "./game.service";
+import { getGame, launchGame } from "./game.service";
 import { setUserReady } from "../users/users.service";
-import { WebSocketMessage, UserReadyContent } from "../../utils/websocket/websocket.types";
 import { User } from "../users/users.type";
 
 interface GameProps {
   setViewData: Function;
-  game: Game;
-  setGame: Function;
   user: User;
   ws: WebSocket;
+  idGame: string;
 }
 
-const GameView = ({ setViewData, game, setGame, user: { id: idUser }, ws: initialWebsocket }: GameProps) => {
+const GameView = ({ setViewData, user: { id: idUser }, ws: initialWebsocket, idGame }: GameProps) => {
   const [ws, setWebSocket] = useState(initialWebsocket);
-
+  const [game, setGame] = useState<Game>();
   useEffect(() => {
-    setWebSocket((lastWs) => {
-      lastWs.onmessage = (e) => {
-        const { message, content } = JSON.parse(e.data.toString());
-        switch (message) {
-          case "userReady":
-            if (game && content) {
-              if (game.users && game.users.find(({ idUser }) => idUser === content.idUser)) {
-                setGame((prevGame) => {
-                  const newGame = { ...prevGame };
-                  const newUserReady = newGame.users.find(({ idUser }) => idUser === content.idUser);
-                  if (newUserReady) newUserReady.ready = true;
-                  return newGame;
-                });
-              } else if (game.users && !game.users.find(({ idUser }) => idUser === content.idUser)) {
-                setGame((prevGame) => {
-                  const newGame = { ...prevGame };
-                  newGame.users.push({ idUser: content.idUser, ready: content.ready });
-                  return newGame;
-                });
-              }
+    getGame(idGame)
+      .then((game) => {
+        setGame(game);
+        setWebSocket((lastWs) => {
+          lastWs.onmessage = (e) => {
+            const { message, content } = JSON.parse(e.data.toString());
+            console.log("socket", message, content);
+
+            switch (message) {
+              case "userReady":
+                console.log(game, content);
+                if (game && content) {
+                  if (game.users && game.users.find(({ idUser: giu }) => giu === content.idUser)) {
+                    setGame((prevGame) => {
+                      const newGame = { ...prevGame };
+                      const newUserReady = newGame.users.find(({ idUser: giu }) => giu === content.idUser);
+                      if (newUserReady) newUserReady.ready = true;
+                      return newGame;
+                    });
+                  } else if (game.users && !game.users.find(({ idUser: giu }) => giu === content.idUser)) {
+                    setGame((prevGame) => {
+                      const newGame = { ...prevGame };
+                      newGame.users.push({ idUser: content.idUser, ready: content.ready, credit: 0, score: 0 });
+                      return newGame;
+                    });
+                  }
+                }
+                break;
+              case "gameStarted":
+                setViewData({ index: 0, props: { idGame: game.id } });
+                break;
+              default:
+                console.log(`${message} not known as ws event`);
+                break;
             }
-            break;
-          case "gameStarted":
-            setViewData({ index: 0, props: { idGame: game.id } });
-            break;
-          default:
-            console.log(`${message} not known as ws event`);
-            break;
-        }
-      };
-      return lastWs;
-    });
-  }, []);
+          };
+
+          return lastWs;
+        });
+      })
+      .catch((error) => console.log(error));
+  }, [idGame]);
 
   function onLaunchClick() {
     launchGame(game.id);
@@ -74,7 +81,7 @@ const GameView = ({ setViewData, game, setGame, user: { id: idUser }, ws: initia
     return game.users?.some(({ ready }) => !ready);
   }
 
-  return game && idUser ? (
+  return game && idUser && ws ? (
     <View style={styles.game_container}>
       <View style={styles.game_name_container}>
         <Text>

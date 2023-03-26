@@ -29,14 +29,7 @@ interface MainViewArguments {
 }
 
 const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArguments) => {
-  const [game, setGame] = useState<Game>();
-
-  useEffect(() => {
-    if (viewData?.props?.idGame)
-      getGame(viewData?.props?.idGame)
-        .then((game) => setGame(game))
-        .catch((error) => console.log(error));
-  }, [viewData?.props?.idGame, user, ws]);
+  useEffect(() => {}, [user, ws]);
   if (!isReady([user, user?.id, ws]))
     return (
       <View>
@@ -45,8 +38,8 @@ const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArgument
     );
   switch (viewData.index) {
     case 0:
-      return isReady([ws, user, game]) ? (
-        <ButtonLast ws={ws} user={user} game={game} setViewData={setViewData} />
+      return isReady([ws, user]) ? (
+        <ButtonLast ws={ws} user={user} setViewData={setViewData} idGame={viewData.props.idGame} />
       ) : (
         <View>
           <Text>LOADER</Text>
@@ -59,8 +52,8 @@ const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArgument
     case 4:
       return <GameCreation setViewData={setViewData}></GameCreation>;
     case 5:
-      return isReady([user, game]) ? (
-        <GameView ws={ws} user={user} game={game} setGame={setGame} setViewData={setViewData}></GameView>
+      return isReady([user]) ? (
+        <GameView ws={ws} user={user} setViewData={setViewData} idGame={viewData.props.idGame}></GameView>
       ) : (
         <View>
           <Text>LOADER</Text>

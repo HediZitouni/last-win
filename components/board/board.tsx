@@ -8,34 +8,17 @@ import { User } from "../users/users.type";
 
 interface BoardProperties {
   game: Game;
-  ws: WebSocket;
 }
 
-const Board = ({ game: { id: idGame, users, last }, ws: initWebsocket }: BoardProperties) => {
-  const [triggerRefresh, setTriggerRefresh] = React.useState<boolean>(false);
-  const [ws, setWebSocket] = React.useState(initWebsocket);
+const Board = ({ game: { id: idGame, users, last } }: BoardProperties) => {
   const [mapUsers, setMapUsers] = React.useState<Map<String, User>>();
 
   useEffect(() => {
-    setWebSocket((lastWs) => {
-      lastWs.onmessage = (e) => {
-        const { message } = JSON.parse(e.data.toString());
-        switch (message) {
-          case "lastChanged":
-            setTriggerRefresh(!triggerRefresh);
-            break;
-          default:
-            console.log(`${message} not known as ws event`);
-            break;
-        }
-      };
-      return lastWs;
-    });
     getUsers(idGame).then((uigs) => {
       const mapUigs = new Map(uigs.map((uig) => [uig.id, uig]));
       setMapUsers(mapUigs);
     });
-  }, [triggerRefresh]);
+  }, []);
 
   return mapUsers ? (
     <>

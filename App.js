@@ -8,26 +8,35 @@ import { __retrieveDeviceId, __retrieveUserId, __storeUserId } from "./component
 export default function App() {
   const [viewData, setViewData] = useState({ index: 3 });
   const [user, setUser] = useState(null);
+
   const [ws, setWebSocket] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  function connectWebsocket(url, idUser) {
+    const defaultWs = new WebSocket(url);
+    defaultWs.onopen = () => {
+      console.log("open", idUser);
+      defaultWs.send(JSON.stringify({ message: "setupUser", content: { idUser } }));
+    };
+    defaultWs.onclose = () => {
+      console.log("closed");
+      setRetryCount(retryCount + 1);
+      setTimeout(() => {
+        connectWebsocket(url, idUser);
+      }, 1000 * Math.pow(2, retryCount));
+    };
+    defaultWs.onerror = (e) => {
+      console.log("error", e);
+    };
+
+    setWebSocket(defaultWs);
+  }
 
   useEffect(() => {
     setupUser()
       .then((user) => {
         setUser(user);
-        setWebSocket(() => {
-          const ws = new WebSocket("ws://localhost:3000/");
-          ws.onopen = () => {
-            console.log("open", user.id);
-            ws.send(JSON.stringify({ message: "setupUser", content: { idUser: user.id } }));
-          };
-          ws.onclose = (e) => {
-            console.log("close");
-          };
-          ws.onerror = (e) => {
-            console.log("error", e);
-          };
-          return ws;
-        });
+        connectWebsocket("ws://localhost:3000/", user.id);
       })
       .catch((err) => {
         console.log(err);

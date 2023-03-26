@@ -27,7 +27,7 @@ export interface GameInput {
   idOwner?: string;
 }
 
-interface UserInGame {
+export interface UserInGame {
   idUser: string;
   ready: boolean;
   credit: number;
