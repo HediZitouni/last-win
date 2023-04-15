@@ -9,3 +9,13 @@ export interface User {
   isLast?: boolean;
   games: Game[];
 }
+
+export const initialUser: User = {
+  id: "",
+  deviceId: "",
+  name: "",
+  score: 0,
+  credit: 0,
+  isLast: false,
+  games: [],
+};
