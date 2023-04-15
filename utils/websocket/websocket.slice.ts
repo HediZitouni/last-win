@@ -5,8 +5,10 @@ export const websocketSlice = createSlice({
   name: "websocket",
   initialState: new WebSocket("ws://localhost:3000/"),
   reducers: {
-    initWebsocket: (state: WebSocket, { payload }: PayloadAction<string>) =>
-      Object.assign(state, connectWebsocket("ws://localhost:3000/", payload)),
+    initWebsocket: (state: WebSocket, { payload }: PayloadAction<WebSocket>) => {
+      //      state = { ...connectWebsocket("ws://localhost:3000/", payload) };
+      return state;
+    },
   },
 });
 

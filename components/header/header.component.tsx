@@ -2,11 +2,11 @@ import React from "react";
 import { StyleSheet, View, Button } from "react-native";
 import { button_grey, footer_grey } from "../../utils/common-styles";
 
-const Header = ({ setViewData }) => {
+const Header = ({ navigation }) => {
   return (
     <View style={styles.footer}>
       <View style={styles.footer_item_1}>
-        <Button title="LASTWIN LOGO" color={button_grey} onPress={() => setViewData({ index: 3 })}></Button>
+        <Button title="LASTWIN LOGO" color={button_grey} onPress={() => navigation.navigate("Home")}></Button>
       </View>
     </View>
   );
