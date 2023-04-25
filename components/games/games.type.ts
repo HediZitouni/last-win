@@ -13,6 +13,21 @@ export interface Game {
   endedAt?: string;
 }
 
+export const initialGame: Game = {
+  id: "",
+  hashtag: "",
+  name: "",
+  credits: 0,
+  time: 0,
+  blind: false,
+  maxPlayers: 0,
+  idOwner: "",
+  last: {
+    idUser: "",
+    date: 0,
+  },
+};
+
 interface Last {
   idUser: string;
   date: number;

@@ -5,19 +5,16 @@ import { Game } from "../games/games.type";
 import { setupUser } from "../init/init.lib";
 import StyledPressable from "../pressable/pressable.component";
 import { User } from "../users/users.type";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 interface GameMenuProps {
   user: User;
   setViewData: Function;
+  navigation: any;
 }
-const GameMenu = ({ user: initUser, setViewData }: GameMenuProps) => {
-  const [{ games }, setUser] = React.useState(initUser);
-
-  useEffect(() => {
-    setupUser().then((u) => {
-      setUser(u);
-    });
-  }, []);
+const GameMenu = ({ setViewData, navigation }: GameMenuProps) => {
+  const { games } = useSelector((state: RootState) => state.user);
 
   return (
     <View style={styles.game_menu_view_container}>
@@ -27,11 +24,18 @@ const GameMenu = ({ user: initUser, setViewData }: GameMenuProps) => {
             return (
               <StyledPressable
                 onPressFunction={() => {
-                  if (game.startedAt) {
-                    setViewData({ index: 0, props: { idGame: game.id } });
-                  } else {
-                    setViewData({ index: 5, props: { idGame: game.id } });
-                  }
+                  () => {
+                    if (game.startedAt) {
+                      navigation.navigate("ButtonLast", { idGame: game.id });
+                    } else {
+                      navigation.navigate("GameView", { idGame: game.id });
+                    }
+                  };
+                  // if (game.startedAt) {
+                  //   setViewData({ index: 0, props: { idGame: game.id } });
+                  // } else {
+                  //   setViewData({ index: 5, props: { idGame: game.id } });
+                  // }
                 }}
                 defaultStyle={styles.game_menu_left_item}
                 pressedStyle={styles.pressed_game_menu_left_item}
@@ -49,17 +53,13 @@ const GameMenu = ({ user: initUser, setViewData }: GameMenuProps) => {
       <View style={styles.game_menu_middle_container}></View>
       <View style={styles.game_menu_right_container}>
         <StyledPressable
-          onPressFunction={() => {
-            setViewData({ index: 4 });
-          }}
+          onPressFunction={() => navigation.navigate("GameCreation")}
           defaultStyle={styles.game_menu_right_item}
           pressedStyle={styles.pressed_game_menu_right_item}
           text={"Create a game"}
         ></StyledPressable>
         <StyledPressable
-          onPressFunction={() => {
-            setViewData({ index: 6 });
-          }}
+          onPressFunction={() => navigation.navigate("GameJoin")}
           defaultStyle={styles.game_menu_right_item}
           pressedStyle={styles.pressed_game_menu_right_item}
           text={"Join a game"}

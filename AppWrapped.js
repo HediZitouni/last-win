@@ -7,6 +7,8 @@ import { __retrieveDeviceId, __retrieveUserId, __storeUserId } from "./component
 import { useDispatch, useSelector } from "react-redux";
 
 import { initUser } from "./components/users/users.slice";
+import GameJoin from "./components/game-join/game-join.component";
+import GameMenu from "./components/game-menu/game-menu.component";
 
 export default function AppWrapped({ navigation }) {
   const dispatch = useDispatch();
@@ -28,7 +30,8 @@ export default function AppWrapped({ navigation }) {
   return user && user.id ? (
     <SafeAreaView style={styles.container}>
       <Header setViewData={setViewData} navigation={navigation}></Header>
-      <MainView viewData={viewData} setViewData={setViewData}></MainView>
+      {/* <MainView viewData={viewData} setViewData={setViewData}></MainView> */}
+      {/* <GameMenu user={user} setViewData={setViewData}></GameMenu> */}
     </SafeAreaView>
   ) : (
     <View>

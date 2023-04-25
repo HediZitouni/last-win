@@ -30,7 +30,7 @@ interface MainViewArguments {
 
 const MainView = ({ viewData, user, setUser, setViewData, ws }: MainViewArguments) => {
   useEffect(() => {}, [user, ws]);
-  if (!isReady([user, user?.id, ws]))
+  if (!isReady([user, user?.id]))
     return (
       <View>
         <Text>LOADING MAIN VIEW</Text>

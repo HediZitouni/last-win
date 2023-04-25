@@ -1,18 +1,18 @@
 import { applyMiddleware, configureStore } from "@reduxjs/toolkit";
 import { User } from "../components/users/users.type";
-import { WebSocket } from "ws";
 import usersSlice from "../components/users/users.slice";
-import websocketSlice from "../utils/websocket/websocket.slice";
 import { websocketMiddleware } from "../utils/websocket/websocket.middleware";
+import { Game } from "../components/games/games.type";
+import gameSlice from "../components/game/game.slice";
 
 export interface RootState {
-  //webSocket: WebSocket;
+  game: Game;
   user: User;
 }
 export default configureStore({
   reducer: {
     user: usersSlice,
-    //websocket: websocketSlice,
+    game: gameSlice,
   },
   enhancers: [applyMiddleware(websocketMiddleware("ws://localhost:3000/"))],
 });

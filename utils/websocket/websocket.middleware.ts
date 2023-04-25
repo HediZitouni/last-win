@@ -21,6 +21,7 @@ export const websocketMiddleware = (url) => {
         case "WELCOME":
           console.log("WELCOME");
           break;
+
         // Handle other actions as needed
         default:
           return next(action);

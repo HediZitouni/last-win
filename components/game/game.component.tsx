@@ -8,17 +8,18 @@ import { __retrieveUserId } from "../users/users.store";
 import { getGame, launchGame } from "./game.service";
 import { setUserReady } from "../users/users.service";
 import { User } from "../users/users.type";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 interface GameProps {
-  setViewData: Function;
-  user: User;
-  ws: WebSocket;
+  navigation: any;
   idGame: string;
 }
 
-const GameView = ({ setViewData, user: { id: idUser }, ws: initialWebsocket, idGame }: GameProps) => {
-  const [ws, setWebSocket] = useState(initialWebsocket);
+const GameView = ({ idGame, navigation }: GameProps) => {
   const [game, setGame] = useState<Game>();
+  const idUser = useSelector((state: RootState) => state.user.id);
+
   useEffect(() => {
     getGame(idGame)
       .then((game) => {
