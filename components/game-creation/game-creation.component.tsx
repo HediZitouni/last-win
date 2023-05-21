@@ -5,13 +5,16 @@ import { Game, GameInput } from "../games/games.type";
 import StyledPressable from "../pressable/pressable.component";
 import { button_grey, button_grey_press } from "../../utils/common-styles";
 import { createGame } from "./game-creation.service";
+import { getGame } from "../game/game.service";
+import { setGame as setGameSlice } from "../game/game.slice";
+import { useDispatch } from "react-redux";
 
 interface GameCreationProps {
-  setViewData: Function;
   navigation: any;
 }
 
-const GameCreation = ({ setViewData, navigation }: GameCreationProps) => {
+const GameCreation = ({ navigation }: GameCreationProps) => {
+  const dispatch = useDispatch();
   const [game, setGame] = useState<GameInput>(defaultGameInput);
 
   function changeValue(gameInput: GameInput) {
@@ -20,8 +23,9 @@ const GameCreation = ({ setViewData, navigation }: GameCreationProps) => {
 
   async function onCreateClick() {
     const idGame = await createGame(game);
+    const dbGame = await getGame(idGame);
+    dispatch(setGameSlice(dbGame));
     navigation.navigate("GameView", { idGame });
-    // setViewData({ index: 5, props: { idGame } });
   }
 
   return (

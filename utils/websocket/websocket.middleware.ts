@@ -1,3 +1,5 @@
+import { getNavigation } from "../../App";
+import { upsertUser } from "../../components/game/game.slice";
 import { connectWebsocket } from "./websocket";
 
 export const websocketMiddleware = (url) => {
@@ -6,6 +8,7 @@ export const websocketMiddleware = (url) => {
   return ({ dispatch, getState }) =>
     (next) =>
     (action) => {
+      const navigation = getNavigation();
       switch (action.type) {
         case "WS_CONNECT":
           const { id: idUser } = getState().user;
@@ -21,7 +24,15 @@ export const websocketMiddleware = (url) => {
         case "WELCOME":
           console.log("WELCOME");
           break;
+        case "userReady":
+          const { idGame: userReadyIdGame, ...content } = action.payload;
 
+          dispatch(upsertUser([userReadyIdGame, { ...content, credit: 0, score: 0 }]));
+          break;
+        case "gameStarted":
+          const { idGame } = action.payload;
+          navigation.navigate("ButtonLast", { idGame: idGame });
+          break;
         // Handle other actions as needed
         default:
           return next(action);

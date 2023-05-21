@@ -14,7 +14,6 @@ export default function AppWrapped({ navigation }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const idUser = useSelector((state) => state.user.id);
-  const [viewData, setViewData] = useState({ index: 3 });
 
   useEffect(() => {
     setupUser()
@@ -29,9 +28,8 @@ export default function AppWrapped({ navigation }) {
 
   return user && user.id ? (
     <SafeAreaView style={styles.container}>
-      <Header setViewData={setViewData} navigation={navigation}></Header>
-      {/* <MainView viewData={viewData} setViewData={setViewData}></MainView> */}
-      {/* <GameMenu user={user} setViewData={setViewData}></GameMenu> */}
+      <Header navigation={navigation}></Header>
+      <GameMenu navigation={navigation}></GameMenu>
     </SafeAreaView>
   ) : (
     <View>

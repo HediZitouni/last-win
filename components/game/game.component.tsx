@@ -13,56 +13,22 @@ import { RootState } from "../../store/store";
 
 interface GameProps {
   navigation: any;
-  idGame: string;
+  route: any;
 }
 
-const GameView = ({ idGame, navigation }: GameProps) => {
-  const [game, setGame] = useState<Game>();
+const GameView = ({ route, navigation }: GameProps) => {
+  // const [game, setGame] = useState<Game>();
+  const game = useSelector((state: RootState) => state.game[route.params.idGame]);
+
   const idUser = useSelector((state: RootState) => state.user.id);
 
   useEffect(() => {
-    getGame(idGame)
-      .then((game) => {
-        setGame(game);
-        setWebSocket((lastWs) => {
-          lastWs.onmessage = (e) => {
-            const { message, content } = JSON.parse(e.data.toString());
-            console.log("socket", message, content);
-
-            switch (message) {
-              case "userReady":
-                console.log(game, content);
-                if (game && content) {
-                  if (game.users && game.users.find(({ idUser: giu }) => giu === content.idUser)) {
-                    setGame((prevGame) => {
-                      const newGame = { ...prevGame };
-                      const newUserReady = newGame.users.find(({ idUser: giu }) => giu === content.idUser);
-                      if (newUserReady) newUserReady.ready = true;
-                      return newGame;
-                    });
-                  } else if (game.users && !game.users.find(({ idUser: giu }) => giu === content.idUser)) {
-                    setGame((prevGame) => {
-                      const newGame = { ...prevGame };
-                      newGame.users.push({ idUser: content.idUser, ready: content.ready, credit: 0, score: 0 });
-                      return newGame;
-                    });
-                  }
-                }
-                break;
-              case "gameStarted":
-                setViewData({ index: 0, props: { idGame: game.id } });
-                break;
-              default:
-                console.log(`${message} not known as ws event`);
-                break;
-            }
-          };
-
-          return lastWs;
-        });
-      })
-      .catch((error) => console.log(error));
-  }, [idGame]);
+    // getGame(route.params.idGame)
+    //   .then((game) => {
+    //     setGame(game);
+    //   })
+    //   .catch((error) => console.log(error));
+  }, [route.params.idGame]);
 
   function onLaunchClick() {
     launchGame(game.id);
@@ -82,7 +48,7 @@ const GameView = ({ idGame, navigation }: GameProps) => {
     return game.users?.some(({ ready }) => !ready);
   }
 
-  return game && idUser && ws ? (
+  return game && idUser ? (
     <View style={styles.game_container}>
       <View style={styles.game_name_container}>
         <Text>
@@ -114,9 +80,6 @@ const GameView = ({ idGame, navigation }: GameProps) => {
           </View>
           <View style={styles.rule}>
             <Text>Duration(minutes): {game.time}</Text>
-          </View>
-          <View style={styles.rule}>
-            <Text>Credits: {game.credits}</Text>
           </View>
           <View style={styles.rule}>
             <Text>Credits: {game.credits}</Text>

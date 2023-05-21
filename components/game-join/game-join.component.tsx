@@ -5,16 +5,19 @@ import StyledPressable from "../pressable/pressable.component";
 import { button_grey, button_grey_press } from "../../utils/common-styles";
 import { getIdGameByHashtag, joinGame } from "./game-join.service";
 import { User } from "../users/users.type";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 interface GameJoinProps {
-  setViewData: Function;
   user: User;
+  navigation: any;
 }
 
-const GameJoin = ({ setViewData, user }: GameJoinProps) => {
+const GameJoin = ({ navigation }: GameJoinProps) => {
+  const user = useSelector((state: RootState) => state.user);
+
   const [hashtag, setHashtag] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const { id: idUser } = user;
 
   useEffect(() => {
     console.log(user);
@@ -25,13 +28,13 @@ const GameJoin = ({ setViewData, user }: GameJoinProps) => {
   }
 
   async function onJoinClick() {
-    const idGame = await getIdGameByHashtag(hashtag, idUser);
+    const idGame = await getIdGameByHashtag(hashtag, user.id);
     if (idGame) {
       const joinStatus = await joinGame(idGame);
       if (joinStatus) {
         setErrorMessage(joinStatus);
       } else {
-        setViewData({ index: 5, props: { idGame } });
+        navigation.navigate("GameView", { idGame });
       }
       setErrorMessage("");
     } else {
@@ -39,7 +42,7 @@ const GameJoin = ({ setViewData, user }: GameJoinProps) => {
     }
   }
 
-  return idUser ? (
+  return user.id ? (
     <View style={styles.game_join_view_container}>
       <View style={styles.input_container}>
         <Text>{errorMessage}</Text>

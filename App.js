@@ -11,15 +11,25 @@ import GameJoin from "./components/game-join/game-join.component";
 import GameView from "./components/game/game.component";
 const Stack = createNativeStackNavigator();
 
+let navigation;
+
+export function setNavigation(ref) {
+  navigation = ref;
+}
+
+export function getNavigation() {
+  return navigation;
+}
 export default function App() {
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={(ref) => setNavigation(ref)}>
       <Provider store={store}>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
           }}
         >
+          <Stack.Screen name="AppWrapped" component={AppWrapped} />
           <Stack.Screen name="GameMenu" component={GameMenu} />
           <Stack.Screen name="GameCreation" component={GameCreation} />
           <Stack.Screen name="Home" component={AppWrapped} />

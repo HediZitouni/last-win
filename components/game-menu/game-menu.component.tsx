@@ -1,19 +1,13 @@
 import React, { useEffect } from "react";
 import { StyleSheet, View, Button, Text, Pressable } from "react-native";
-import { button_grey, footer_grey } from "../../utils/common-styles";
-import { Game } from "../games/games.type";
-import { setupUser } from "../init/init.lib";
 import StyledPressable from "../pressable/pressable.component";
-import { User } from "../users/users.type";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 
 interface GameMenuProps {
-  user: User;
-  setViewData: Function;
   navigation: any;
 }
-const GameMenu = ({ setViewData, navigation }: GameMenuProps) => {
+const GameMenu = ({ navigation }: GameMenuProps) => {
   const { games } = useSelector((state: RootState) => state.user);
 
   return (
