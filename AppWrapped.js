@@ -27,23 +27,10 @@ export default function AppWrapped({ navigation }) {
   }, [idUser]);
 
   return user && user.id ? (
-    <SafeAreaView style={styles.container}>
-      <Header navigation={navigation}></Header>
-      <GameMenu navigation={navigation}></GameMenu>
-    </SafeAreaView>
+    <GameMenu navigation={navigation}></GameMenu>
   ) : (
     <View>
       <Text>LOADING APP</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
-});

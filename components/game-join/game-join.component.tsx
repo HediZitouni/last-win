@@ -5,8 +5,10 @@ import StyledPressable from "../pressable/pressable.component";
 import { button_grey, button_grey_press } from "../../utils/common-styles";
 import { getIdGameByHashtag, joinGame } from "./game-join.service";
 import { User } from "../users/users.type";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import { getGame } from "../game/game.service";
+import { setGame as setGameSlice } from "../game/game.slice";
 
 interface GameJoinProps {
   user: User;
@@ -14,6 +16,8 @@ interface GameJoinProps {
 }
 
 const GameJoin = ({ navigation }: GameJoinProps) => {
+  const dispatch = useDispatch();
+
   const user = useSelector((state: RootState) => state.user);
 
   const [hashtag, setHashtag] = useState<string>("");
@@ -34,6 +38,8 @@ const GameJoin = ({ navigation }: GameJoinProps) => {
       if (joinStatus) {
         setErrorMessage(joinStatus);
       } else {
+        const dbGame = await getGame(idGame);
+        dispatch(setGameSlice(dbGame));
         navigation.navigate("GameView", { idGame });
       }
       setErrorMessage("");

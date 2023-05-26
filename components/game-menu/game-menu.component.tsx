@@ -1,14 +1,31 @@
 import React, { useEffect } from "react";
 import { StyleSheet, View, Button, Text, Pressable } from "react-native";
 import StyledPressable from "../pressable/pressable.component";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import { getGame } from "../game/game.service";
+import { setGame as setGameSlice } from "../game/game.slice";
+import { Game } from "../games/games.type";
 
 interface GameMenuProps {
   navigation: any;
 }
 const GameMenu = ({ navigation }: GameMenuProps) => {
+  const dispatch = useDispatch();
   const { games } = useSelector((state: RootState) => state.user);
+  const gameStore = useSelector((state: RootState) => state.game);
+
+  const handleGamePress = async (game: Game) => {
+    if (game.startedAt) {
+      if (!gameStore[game.id]) {
+        const dbGame = await getGame(game.id);
+        dispatch(setGameSlice(dbGame));
+      }
+      navigation.navigate("ButtonLast", { idGame: game.id });
+    } else {
+      navigation.navigate("GameView", { idGame: game.id });
+    }
+  };
 
   return (
     <View style={styles.game_menu_view_container}>
@@ -18,18 +35,7 @@ const GameMenu = ({ navigation }: GameMenuProps) => {
             return (
               <StyledPressable
                 onPressFunction={() => {
-                  () => {
-                    if (game.startedAt) {
-                      navigation.navigate("ButtonLast", { idGame: game.id });
-                    } else {
-                      navigation.navigate("GameView", { idGame: game.id });
-                    }
-                  };
-                  // if (game.startedAt) {
-                  //   setViewData({ index: 0, props: { idGame: game.id } });
-                  // } else {
-                  //   setViewData({ index: 5, props: { idGame: game.id } });
-                  // }
+                  handleGamePress(game);
                 }}
                 defaultStyle={styles.game_menu_left_item}
                 pressedStyle={styles.pressed_game_menu_left_item}

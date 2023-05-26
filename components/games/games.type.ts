@@ -48,3 +48,9 @@ export interface UserInGame {
   credit: number;
   score: number;
 }
+
+export interface LastChangedInput {
+  idGame: string;
+  idUser: string;
+  date: Date;
+}

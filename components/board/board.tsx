@@ -5,16 +5,20 @@ import { getGame } from "../game/game.service";
 import { Game } from "../games/games.type";
 import { getUsers } from "../users/users.service";
 import { User } from "../users/users.type";
+import { RootState } from "../../store/store";
+import { useSelector } from "react-redux";
 
 interface BoardProperties {
-  game: Game;
+  idGame: string;
 }
 
-const Board = ({ game: { id: idGame, users, last } }: BoardProperties) => {
+const Board = ({ idGame }: BoardProperties) => {
+  const game = useSelector((state: RootState) => state.game[idGame]);
+
   const [mapUsers, setMapUsers] = React.useState<Map<String, User>>();
 
   useEffect(() => {
-    getUsers(idGame).then((uigs) => {
+    getUsers(game.id).then((uigs) => {
       const mapUigs = new Map(uigs.map((uig) => [uig.id, uig]));
       setMapUsers(mapUigs);
     });
@@ -24,10 +28,13 @@ const Board = ({ game: { id: idGame, users, last } }: BoardProperties) => {
     <>
       <View style={styles.board_container}>
         <ScrollView>
-          {users.map((uig, index) => {
+          {game.users.map((uig, index) => {
             const user = mapUsers.get(uig.idUser);
             return (
-              <View style={[styles.board_item, user.id === last.idUser ? styles.board_item_last : null]} key={index}>
+              <View
+                style={[styles.board_item, user.id === game.last.idUser ? styles.board_item_last : null]}
+                key={index}
+              >
                 <View style={styles.board_item_name}>
                   <Text>{user.name}</Text>
                 </View>

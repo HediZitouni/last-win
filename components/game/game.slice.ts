@@ -1,10 +1,9 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store/store";
-import { Game, initialGame, UserInGame } from "../games/games.type";
-import { User } from "../users/users.type";
+import { Game, UserInGame } from "../games/games.type";
 
 export const gameSlice = createSlice({
-  name: "games",
+  name: "game",
   initialState: {},
   reducers: {
     setGame: (state, action: PayloadAction<Game>) => {
@@ -23,10 +22,29 @@ export const gameSlice = createSlice({
         game.users = users;
       }
     },
+    startGame: (state, action: PayloadAction<[string, number, number]>) => {
+      const [idGame, startedAt, endedAt] = action.payload;
+      state[idGame].startedAt = startedAt;
+      state[idGame].endedAt = endedAt;
+
+      return state;
+    },
+    lastChanged: (state, action: PayloadAction<any>) => {
+      const { idUser, date, idGame, users } = action.payload;
+      state[idGame].last = { idUser, date };
+      state[idGame].users = users;
+    },
+    addScoreToLast: (state, action: PayloadAction<[string, number]>) => {
+      const [idGame, points] = action.payload;
+      const indexLast = state[idGame].users?.findIndex((u) => u.idUser === state[idGame].last.idUser);
+      if (indexLast === -1) return state;
+      state[idGame].users[indexLast].score += points;
+      return state;
+    },
   },
 });
 
-export const { setGame, upsertUser } = gameSlice.actions;
+export const { setGame, upsertUser, lastChanged, addScoreToLast, startGame } = gameSlice.actions;
 export const getMemoizedGame = createSelector(
   (state: RootState) => state.game,
   (game) => game

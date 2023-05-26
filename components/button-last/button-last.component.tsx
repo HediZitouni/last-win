@@ -3,99 +3,49 @@ import { View, StyleSheet, Text, Pressable } from "react-native";
 import { background_grey, button_grey, button_grey_press } from "../../utils/common-styles";
 import Board from "../board/board";
 import Clock from "../clock/clock.component";
-import { getGame } from "../game/game.service";
-import { Game, UserInGame } from "../games/games.type";
-import { getUserById, setLast } from "../users/users.service";
+import { setLast } from "../users/users.service";
 import { __retrieveUserId, __storeUserId } from "../users/users.store";
-import { User } from "../users/users.type";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store/store";
+import { addScoreToLast } from "../game/game.slice";
 
 interface ButtonLastProperties {
-  user: User;
-  idGame: string;
-  ws: WebSocket;
-  setViewData: Function;
+  route: any;
+  navigation: any;
 }
-const ButtonLast = ({ user, ws: initWebsocket, setViewData, idGame }: ButtonLastProperties) => {
-  const [{ id: idUser, name }, setUser] = React.useState<User | null>(user);
-  const [game, setGame] = React.useState<Game | null>();
-  const [uig, setUserInGame] = React.useState<UserInGame>();
-  const [triggerRefresh, setTriggerRefresh] = React.useState<boolean>(false);
-  const [triggerScoreRefresh, setTriggerScoreRefresh] = React.useState<boolean>(false);
-  const [ws, setWebSocket] = React.useState(initWebsocket);
-  useEffect(() => {
-    getUserById(idUser)
-      .then((user) => {
-        setUser(user);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    getGame(idGame)
-      .then((loadedGame) => {
-        setGame(loadedGame);
-        setUserInGame(loadedGame.users?.find((u) => u.idUser === idUser));
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    setWebSocket((lastWs) => {
-      lastWs.onmessage = (e) => {
-        const { message } = JSON.parse(e.data.toString());
-        switch (message) {
-          case "lastChanged":
-            setTriggerRefresh(!triggerRefresh);
-            break;
-          default:
-            console.log(`${message} not known as ws event`);
-            break;
-        }
-      };
-      return lastWs;
-    });
-  }, [triggerRefresh]);
+const ButtonLast = ({ route, navigation }: ButtonLastProperties) => {
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (!game) return;
-    if (Math.round(Date.now() / 1000) < +game.endedAt) {
-      setGame((prev) => {
-        const last = game.users?.find((u) => u.idUser === prev.last.idUser);
-        if (!last) return prev;
-        const newScore = last.score + 1;
-        last.score = newScore;
-        return prev;
-      });
-      if (isLast()) {
-        setUserInGame((prev) => {
-          const newScore = prev.score + 1;
-          const currUser = game.users?.find((u) => u.idUser === idUser);
-          if (currUser) currUser.score = newScore;
-          return { ...prev, score: newScore };
-        });
-      }
+  const game = useSelector((state: RootState) => state.game[route.params.idGame]);
+  const user = useSelector((state: RootState) => state.user);
+  const uig = game.users.find((u) => u.idUser === user.id);
+  const [triggerRefresh, setTriggerRefresh] = React.useState<boolean>(false);
+
+  function updateScoreLast() {
+    if (game && Math.round(Date.now() / 1000) < +game.endedAt) {
+      dispatch(addScoreToLast([game.id, 1]));
     }
-  }, [triggerScoreRefresh]);
+  }
 
   async function addCount() {
-    await setLast(idGame, idUser);
+    // await setLast(idGame, idUser);
+    await setLast(game.id, user.id);
+
     setTriggerRefresh((prev) => !prev);
   }
 
   function isLast() {
-    return idUser === game.last.idUser;
+    return user.id === game.last.idUser;
   }
 
-  return user && game && ws && uig ? (
+  return user && game ? (
     <View style={styles.last_button_view_container}>
       <View style={styles.header}>
-        <Pressable style={styles.name_container} onPress={() => setViewData({ index: 2 })}>
-          <Text style={styles.name_text}>{name}</Text>
+        <Pressable style={styles.name_container} onPress={() => navigation.navigate("UserInput")}>
+          <Text style={styles.name_text}>{user.name}</Text>
         </Pressable>
         <View style={styles.clock_container}>
-          <Clock
-            startedAt={+game.startedAt}
-            minutes={game.time}
-            setTriggerScoreRefresh={setTriggerScoreRefresh}
-          ></Clock>
+          <Clock idGame={game.id} setTriggerRefresh={updateScoreLast}></Clock>
         </View>
         <View style={styles.placeholder_2}></View>
         <View style={styles.score_container}>
@@ -115,7 +65,7 @@ const ButtonLast = ({ user, ws: initWebsocket, setViewData, idGame }: ButtonLast
         </Pressable>
       </View>
       <View style={styles.board_container}>
-        <Board game={game}></Board>
+        <Board idGame={game.id}></Board>
       </View>
     </View>
   ) : (

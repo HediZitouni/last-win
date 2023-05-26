@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Text } from "react-native";
 import { getTimeLeft } from "./clock.helper";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store/store";
+import { addScoreToLast } from "../game/game.slice";
 
 interface ClockProperties {
-  startedAt: number;
-  minutes: number;
-  setTriggerScoreRefresh: Function;
+  idGame: string;
+  setTriggerRefresh: Function;
 }
 
-const Clock = ({ startedAt, minutes, setTriggerScoreRefresh }: ClockProperties) => {
+const Clock = ({ idGame, setTriggerRefresh }: ClockProperties) => {
+  const dispatch = useDispatch();
+  const game = useSelector((state: RootState) => state.game[idGame]);
+  const { startedAt, time: minutes } = game;
   if (!startedAt || !minutes) return <Text>CLOCK NOT AVAILABLE</Text>;
   const endedAt = startedAt + minutes * 60;
   if (Math.ceil(Date.now() / 1000) < startedAt) return <Text>Game not started yet</Text>;
@@ -17,7 +22,8 @@ const Clock = ({ startedAt, minutes, setTriggerScoreRefresh }: ClockProperties) 
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTriggerScoreRefresh((prev) => !prev);
+      // dispatch(addScoreToLast([idGame, 1]));
+      setTriggerRefresh();
       setSecondesLeft(getTimeLeft(endedAt));
     }, 1000);
     return () => clearInterval(interval);

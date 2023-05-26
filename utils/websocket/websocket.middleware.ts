@@ -1,5 +1,5 @@
 import { getNavigation } from "../../App";
-import { upsertUser } from "../../components/game/game.slice";
+import { lastChanged as lastChangedSlice, startGame, upsertUser } from "../../components/game/game.slice";
 import { connectWebsocket } from "./websocket";
 
 export const websocketMiddleware = (url) => {
@@ -25,15 +25,21 @@ export const websocketMiddleware = (url) => {
           console.log("WELCOME");
           break;
         case "userReady":
-          const { idGame: userReadyIdGame, ...content } = action.payload;
+          const { idGame: userReadyIdGame, userInGame } = action.payload;
 
-          dispatch(upsertUser([userReadyIdGame, { ...content, credit: 0, score: 0 }]));
+          dispatch(upsertUser([userReadyIdGame, userInGame]));
           break;
         case "gameStarted":
-          const { idGame } = action.payload;
+          const { idGame, startedAt, endedAt } = action.payload;
+          dispatch(startGame([idGame, startedAt, endedAt]));
           navigation.navigate("ButtonLast", { idGame: idGame });
           break;
+
+        case "lastChanged":
+          dispatch(lastChangedSlice(action.payload));
+          break;
         // Handle other actions as needed
+
         default:
           return next(action);
       }
