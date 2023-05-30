@@ -28,7 +28,6 @@ const ButtonLast = ({ route, navigation }: ButtonLastProperties) => {
   }
 
   async function addCount() {
-    // await setLast(idGame, idUser);
     await setLast(game.id, user.id);
 
     setTriggerRefresh((prev) => !prev);
@@ -41,9 +40,10 @@ const ButtonLast = ({ route, navigation }: ButtonLastProperties) => {
   return user && game ? (
     <View style={styles.last_button_view_container}>
       <View style={styles.header}>
-        <Pressable style={styles.name_container} onPress={() => navigation.navigate("UserInput")}>
-          <Text style={styles.name_text}>{user.name}</Text>
-        </Pressable>
+        <View style={styles.game_name_container}>
+          <Text style={styles.game_text}>{game.name || "NO NAME GAME"}</Text>
+        </View>
+
         <View style={styles.clock_container}>
           <Clock idGame={game.id} setTriggerRefresh={updateScoreLast}></Clock>
         </View>
@@ -55,9 +55,9 @@ const ButtonLast = ({ route, navigation }: ButtonLastProperties) => {
           <Text>{uig.credit} Credits</Text>
         </View>
       </View>
-      <View style={styles.game_name_container}>
-        <Text style={styles.name_text}>{game.name || "NO NAME GAME"}</Text>
-      </View>
+      <Pressable style={styles.name_container} onPress={() => navigation.navigate("UserInput", { idGame: game.id })}>
+        <Text style={styles.name_text}>{user.name}</Text>
+      </Pressable>
 
       <View style={styles.button_container}>
         <Pressable style={({ pressed }) => [styles.button, styleOnPress(pressed)]} onPress={addCount}>
@@ -85,7 +85,8 @@ const styles = StyleSheet.create({
   },
   placeholder_1: { flex: 1 },
   name_container: { flex: 1 },
-  name_text: { fontSize: 25 },
+  game_text: { fontSize: 25, textAlign: "center" },
+  name_text: { fontSize: 25, textAlign: "center" },
   score_container: { flex: 1 },
   button_container: { flex: 1, flexDirection: "row", alignItems: "center", width: "100%", justifyContent: "center" },
   button: {

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Text, StyleSheet, View, TextInput } from "react-native";
 import { GameInput } from "../games/games.type";
 import StyledPressable from "../pressable/pressable.component";
-import { button_grey, button_grey_press } from "../../utils/common-styles";
+import { background_grey, button_grey, button_grey_press } from "../../utils/common-styles";
 import { getIdGameByHashtag, joinGame } from "./game-join.service";
 import { User } from "../users/users.type";
 import { useDispatch, useSelector } from "react-redux";
@@ -52,8 +52,13 @@ const GameJoin = ({ navigation }: GameJoinProps) => {
     <View style={styles.game_join_view_container}>
       <View style={styles.input_container}>
         <Text>{errorMessage}</Text>
-        <Text>Game Hashtag</Text>
-        <TextInput placeholder="name" value={hashtag} onChangeText={(value) => changeValue(value)}></TextInput>
+        <Text>Game tag</Text>
+        <TextInput
+          style={styles.border}
+          placeholder="Game tag"
+          value={hashtag}
+          onChangeText={(value) => changeValue(value)}
+        ></TextInput>
       </View>
 
       <StyledPressable
@@ -73,7 +78,7 @@ const GameJoin = ({ navigation }: GameJoinProps) => {
 const styles = StyleSheet.create({
   game_join_view_container: {
     flex: 9,
-    backgroundColor: "blue",
+    backgroundColor: background_grey,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -82,7 +87,7 @@ const styles = StyleSheet.create({
   input_container: {
     width: "70%",
     marginBottom: 5,
-    backgroundColor: "red",
+    //backgroundColor: "red",
   },
   button_default: {
     backgroundColor: button_grey,
@@ -94,6 +99,10 @@ const styles = StyleSheet.create({
   },
   button_pressed: {
     backgroundColor: button_grey_press,
+  },
+  border: {
+    borderWidth: 1,
+    borderColor: button_grey,
   },
 });
 

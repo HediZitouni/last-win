@@ -12,6 +12,7 @@ import GameView from "./components/game/game.component";
 
 import { StyleSheet, SafeAreaView } from "react-native";
 import Header from "./components/header/header.component";
+import { background_grey } from "./utils/common-styles";
 
 const Stack = createNativeStackNavigator();
 
@@ -58,5 +59,6 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
+    backgroundColor: background_grey,
   },
 });

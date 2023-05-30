@@ -1,14 +1,17 @@
 import React from "react";
 import { StyleSheet, View, Button } from "react-native";
 import { button_grey, footer_grey } from "../../utils/common-styles";
-import { useNavigationContainerRef } from "@react-navigation/native";
-
+import { useNavigation } from "@react-navigation/native";
 const Header = () => {
-  const navigationRef = useNavigationContainerRef();
+  const navigation = useNavigation();
   return (
     <View style={styles.footer}>
       <View style={styles.footer_item_1}>
-        <Button title="LASTWIN LOGO" color={button_grey} onPress={() => navigationRef.navigate()}></Button>
+        <Button
+          title="LASTWIN LOGO"
+          color={button_grey}
+          onPress={() => navigation.navigate("GameMenu" as never)}
+        ></Button>
       </View>
     </View>
   );

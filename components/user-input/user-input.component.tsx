@@ -3,8 +3,17 @@ import { View, StyleSheet, TextInput, Button } from "react-native";
 import { background_grey, button_grey } from "../../utils/common-styles";
 import { updateUser } from "../users/users.service";
 import { UserData } from "./user-input.type";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store/store";
+import { updateName } from "../users/users.slice";
 
-const UserInput = ({ name, setUser, setViewData }) => {
+interface UserInputProps {
+  navigation: any;
+  route: any;
+}
+const UserInput = ({ navigation, route }: UserInputProps) => {
+  const dispatch = useDispatch();
+  const { name } = useSelector((state: RootState) => state.user);
   const [userData, setUserData] = useState<UserData>({
     name: name || "",
   });
@@ -16,8 +25,8 @@ const UserInput = ({ name, setUser, setViewData }) => {
   async function sendUserData() {
     try {
       await updateUser(userData);
-      setUser((prevState) => ({ ...prevState, name: userData.name }));
-      setViewData({ index: 3 });
+      dispatch(updateName(userData.name));
+      navigation.navigate("ButtonLast", { idGame: route.params.idGame });
     } catch (error) {
       setUserData({ ...userData, name: name || "" });
     }
@@ -46,6 +55,8 @@ const styles = StyleSheet.create({
     marginBottom: "20px",
     textAlign: "center",
     fontSize: 35,
+    borderWidth: 1,
+    borderColor: button_grey,
   },
 });
 

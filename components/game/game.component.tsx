@@ -3,7 +3,7 @@ import { Text, StyleSheet, View } from "react-native";
 
 import { Game } from "../games/games.type";
 import StyledPressable from "../pressable/pressable.component";
-import { button_grey, button_grey_press } from "../../utils/common-styles";
+import { background_grey, button_grey, button_grey_press } from "../../utils/common-styles";
 import { __retrieveUserId } from "../users/users.store";
 import { getGame, launchGame } from "./game.service";
 import { setUserReady } from "../users/users.service";
@@ -51,16 +51,15 @@ const GameView = ({ route, navigation }: GameProps) => {
   return game && idUser ? (
     <View style={styles.game_container}>
       <View style={styles.game_name_container}>
-        <Text>
-          {game.name} - {game.hashtag}
-        </Text>
+        <Text>{game.name}</Text>
+        <Text>Game tag: {game.hashtag}</Text>
       </View>
       <View style={styles.game_content_container}>
         <View style={styles.players_container}>
           <Text style={styles.title}>Players</Text>
           {game.users.map((user, index) => {
             return (
-              <View style={styles.user_item} key={index}>
+              <View style={[styles.user_item, styles.border]} key={index}>
                 <Text>{user.idUser}</Text>
                 <View style={[styles.ready_box, user.ready ? styles.ready : styles.not_ready]}></View>
               </View>
@@ -69,19 +68,19 @@ const GameView = ({ route, navigation }: GameProps) => {
         </View>
         <View style={styles.rules_container}>
           <Text style={styles.title}>Rules</Text>
-          <View style={styles.rule}>
+          <View style={styles.border}>
             <Text>Credits: {game.credits}</Text>
           </View>
-          <View style={styles.rule}>
+          <View style={styles.border}>
             <Text style={game.blind ? styles.ready : styles.not_ready}>Blind: {game.blind}</Text>
           </View>
-          <View style={styles.rule}>
+          <View style={styles.border}>
             <Text>Maximum players: {game.maxPlayers}</Text>
           </View>
-          <View style={styles.rule}>
+          <View style={styles.border}>
             <Text>Duration(minutes): {game.time}</Text>
           </View>
-          <View style={styles.rule}>
+          <View style={styles.border}>
             <Text>Credits: {game.credits}</Text>
           </View>
         </View>
@@ -103,7 +102,7 @@ const GameView = ({ route, navigation }: GameProps) => {
 const styles = StyleSheet.create({
   game_container: {
     flex: 9,
-    backgroundColor: "blue",
+    backgroundColor: background_grey,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -122,19 +121,21 @@ const styles = StyleSheet.create({
   },
   players_container: {
     flex: 1,
-    backgroundColor: "orange",
+    // backgroundColor: "orange",
     paddingLeft: "5px",
     paddingRight: "5px",
   },
   rules_container: {
     flex: 1,
-    backgroundColor: "cyan",
+    // backgroundColor: "cyan",
     paddingLeft: "5px",
     paddingRight: "5px",
   },
-  rule: {
-    backgroundColor: "yellow",
+  border: {
+    borderWidth: 1,
+    borderColor: button_grey,
   },
+
   button_default: {
     backgroundColor: button_grey,
     color: "white",

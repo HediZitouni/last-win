@@ -1,13 +1,21 @@
 import { getNavigation } from "../../App";
-import { lastChanged as lastChangedSlice, startGame, upsertUser } from "../../components/game/game.slice";
+import {
+  lastChanged as lastChangedSlice,
+  setGame as setGameSlice,
+  startGame,
+  upsertUser,
+} from "../../components/game/game.slice";
 import { connectWebsocket } from "./websocket";
+import store from "../../store/store";
+import { getGame } from "../../components/game/game.service";
+import { addGame } from "../../components/users/users.slice";
 
 export const websocketMiddleware = (url) => {
   let websocket = null;
 
   return ({ dispatch, getState }) =>
     (next) =>
-    (action) => {
+    async (action) => {
       const navigation = getNavigation();
       switch (action.type) {
         case "WS_CONNECT":
@@ -26,17 +34,22 @@ export const websocketMiddleware = (url) => {
           break;
         case "userReady":
           const { idGame: userReadyIdGame, userInGame } = action.payload;
-
+          await fetchGame(userReadyIdGame, dispatch);
           dispatch(upsertUser([userReadyIdGame, userInGame]));
           break;
         case "gameStarted":
           const { idGame, startedAt, endedAt } = action.payload;
+          await fetchGame(idGame, dispatch);
           dispatch(startGame([idGame, startedAt, endedAt]));
           navigation.navigate("ButtonLast", { idGame: idGame });
           break;
 
         case "lastChanged":
+          await fetchGame(action.payload.idGame, dispatch);
           dispatch(lastChangedSlice(action.payload));
+          break;
+        case "addGameToUser":
+          dispatch(addGame(action.payload.game));
           break;
         // Handle other actions as needed
 
@@ -45,3 +58,10 @@ export const websocketMiddleware = (url) => {
       }
     };
 };
+
+async function fetchGame(idGame, dispatch) {
+  if (!store.getState().game[idGame]) {
+    const dbGame = await getGame(idGame);
+    dispatch(setGameSlice(dbGame));
+  }
+}

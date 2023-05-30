@@ -3,7 +3,7 @@ import { Pressable, Text, StyleSheet, View, TextInput } from "react-native";
 import Checkbox from "expo-checkbox";
 import { Game, GameInput } from "../games/games.type";
 import StyledPressable from "../pressable/pressable.component";
-import { button_grey, button_grey_press } from "../../utils/common-styles";
+import { background_grey, button_grey, button_grey_press } from "../../utils/common-styles";
 import { createGame } from "./game-creation.service";
 import { getGame } from "../game/game.service";
 import { setGame as setGameSlice } from "../game/game.slice";
@@ -33,9 +33,10 @@ const GameCreation = ({ navigation }: GameCreationProps) => {
       <View style={styles.input_container}>
         <Text>Name</Text>
         <TextInput
-          placeholder="name"
+          placeholder="Name of the game"
           value={game.name}
           onChangeText={(value) => changeValue({ name: value })}
+          style={styles.border}
         ></TextInput>
       </View>
       <View style={styles.input_container}>
@@ -45,6 +46,7 @@ const GameCreation = ({ navigation }: GameCreationProps) => {
           value={game.credits}
           onChangeText={(value) => changeValue({ credits: value })}
           keyboardType="numeric"
+          style={styles.border}
         ></TextInput>
       </View>
 
@@ -54,11 +56,12 @@ const GameCreation = ({ navigation }: GameCreationProps) => {
           placeholder="time"
           value={game.time}
           onChangeText={(value) => changeValue({ time: value })}
+          style={styles.border}
         ></TextInput>
       </View>
       <View style={styles.input_container}>
         <Text>Blind</Text>
-        <View style={styles.blind_checkbox_container}>
+        <View style={[styles.blind_checkbox_container, styles.border]}>
           <Checkbox value={game.blind} onValueChange={(newValue) => changeValue({ blind: newValue })} />
         </View>
       </View>
@@ -68,6 +71,7 @@ const GameCreation = ({ navigation }: GameCreationProps) => {
           placeholder="maxPlayers"
           value={game.maxPlayers}
           onChangeText={(value) => changeValue({ maxPlayers: value })}
+          style={styles.border}
         ></TextInput>
       </View>
       <StyledPressable
@@ -83,7 +87,7 @@ const GameCreation = ({ navigation }: GameCreationProps) => {
 const styles = StyleSheet.create({
   game_creation_view_container: {
     flex: 9,
-    backgroundColor: "blue",
+    backgroundColor: background_grey,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -92,7 +96,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "green",
+    backgroundColor: background_grey,
   },
   blind_checkbox_container: {
     flexDirection: "row",
@@ -101,13 +105,14 @@ const styles = StyleSheet.create({
   checkbox: {
     alignSelf: "center",
   },
-  label: {
-    margin: 8,
-  },
   input_container: {
     width: "70%",
     marginBottom: 5,
-    backgroundColor: "red",
+    //backgroundColor: "red",
+  },
+  border: {
+    borderWidth: 1,
+    borderColor: button_grey,
   },
   button_default: {
     backgroundColor: button_grey,
