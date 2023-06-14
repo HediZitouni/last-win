@@ -1,6 +1,7 @@
 import { getNavigation } from "../../App";
 import {
   lastChanged as lastChangedSlice,
+  nameChanged,
   setGame as setGameSlice,
   startGame,
   upsertUser,
@@ -36,6 +37,10 @@ export const websocketMiddleware = (url) => {
           const { idGame: userReadyIdGame, userInGame } = action.payload;
           await fetchGame(userReadyIdGame, dispatch);
           dispatch(upsertUser([userReadyIdGame, userInGame]));
+          break;
+        case "nameChanged":
+          await fetchGame(action.payload.idGame, dispatch);
+          dispatch(nameChanged([action.payload.idGame, action.payload.idUser, action.payload.name]));
           break;
         case "gameStarted":
           const { idGame, startedAt, endedAt } = action.payload;

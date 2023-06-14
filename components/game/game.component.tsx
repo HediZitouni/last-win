@@ -60,7 +60,7 @@ const GameView = ({ route, navigation }: GameProps) => {
           {game.users.map((user, index) => {
             return (
               <View style={[styles.user_item, styles.border]} key={index}>
-                <Text>{user.idUser}</Text>
+                <Text>{user.name}</Text>
                 <View style={[styles.ready_box, user.ready ? styles.ready : styles.not_ready]}></View>
               </View>
             );

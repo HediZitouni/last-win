@@ -22,6 +22,17 @@ export const gameSlice = createSlice({
         game.users = users;
       }
     },
+    nameChanged: (state, action: PayloadAction<[string, string, string]>) => {
+      const [idGame, idUser, name] = action.payload;
+      const game = state[idGame];
+      if (!game) return state;
+      const users = game.users;
+      const userIndex = users.findIndex((u) => u.idUser === idUser);
+      if (userIndex === -1) return state;
+      users[userIndex].name = name;
+      game.users = users;
+    },
+
     startGame: (state, action: PayloadAction<[string, number, number]>) => {
       const [idGame, startedAt, endedAt] = action.payload;
       state[idGame].startedAt = startedAt;
@@ -44,7 +55,7 @@ export const gameSlice = createSlice({
   },
 });
 
-export const { setGame, upsertUser, lastChanged, addScoreToLast, startGame } = gameSlice.actions;
+export const { setGame, upsertUser, lastChanged, addScoreToLast, startGame, nameChanged } = gameSlice.actions;
 export const getMemoizedGame = createSelector(
   (state: RootState) => state.game,
   (game) => game

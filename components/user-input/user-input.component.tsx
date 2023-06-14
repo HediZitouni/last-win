@@ -24,7 +24,7 @@ const UserInput = ({ navigation, route }: UserInputProps) => {
 
   async function sendUserData() {
     try {
-      await updateUser(userData);
+      await updateUser(userData, route.params.idGame);
       dispatch(updateName(userData.name));
       navigation.navigate("ButtonLast", { idGame: route.params.idGame });
     } catch (error) {

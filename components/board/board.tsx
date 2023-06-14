@@ -15,21 +15,11 @@ interface BoardProperties {
 const Board = ({ idGame }: BoardProperties) => {
   const game = useSelector((state: RootState) => state.game[idGame]);
 
-  const [mapUsers, setMapUsers] = React.useState<Map<String, User>>();
-
-  useEffect(() => {
-    getUsers(game.id).then((uigs) => {
-      const mapUigs = new Map(uigs.map((uig) => [uig.id, uig]));
-      setMapUsers(mapUigs);
-    });
-  }, []);
-
-  return mapUsers ? (
+  return (
     <>
       <View style={styles.board_container}>
         <ScrollView>
-          {game.users.map((uig, index) => {
-            const user = mapUsers.get(uig.idUser);
+          {game.users.map((user, index) => {
             return (
               <View
                 style={[styles.board_item, user.id === game.last.idUser ? styles.board_item_last : null]}
@@ -39,7 +29,7 @@ const Board = ({ idGame }: BoardProperties) => {
                   <Text>{user.name}</Text>
                 </View>
                 <View style={styles.board_item_score}>
-                  <Text>{uig.score}</Text>
+                  <Text>{user.score}</Text>
                 </View>
               </View>
             );
@@ -47,10 +37,6 @@ const Board = ({ idGame }: BoardProperties) => {
         </ScrollView>
       </View>
     </>
-  ) : (
-    <View>
-      <Text>Loading BOARD</Text>
-    </View>
   );
 };
 

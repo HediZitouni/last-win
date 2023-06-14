@@ -20,9 +20,9 @@ async function getOrCreateUser(deviceId: string): Promise<User> {
   return user;
 }
 
-async function updateUser(userData: UserData): Promise<User> {
+async function updateUser(userData: UserData, idGame: string): Promise<User> {
   const id = await __retrieveUserId();
-  const response = await callApi(HTTP_METHODS.PUT, "users", { id, ...userData });
+  const response = await callApi(HTTP_METHODS.PUT, "users", { id, ...userData, idGame });
   const updatedUser: User = await response.json();
   return updatedUser;
 }

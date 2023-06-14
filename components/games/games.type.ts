@@ -44,6 +44,7 @@ export interface GameInput {
 
 export interface UserInGame {
   idUser: string;
+  name: string;
   ready: boolean;
   credit: number;
   score: number;
