@@ -7,7 +7,7 @@ const HTTP_METHODS = {
 };
 
 //const API_ADRESS = 'https://otrom.fr/back/';
-const API_ADRESS = "http://localhost:3000/";
+const API_ADRESS = "http://localhost:3000/back/";
 
 const storeVersion = "0.0.3";
 export { HTTP_METHODS, API_ADRESS, storeVersion };
