@@ -9,10 +9,11 @@ export interface RootState {
   game: Game;
   user: User;
 }
+// changes
 export default configureStore({
   reducer: {
     user: usersSlice,
     game: gameSlice,
   },
-  enhancers: [applyMiddleware(websocketMiddleware("wss://otrom.fr/back:3000/"))],
+  enhancers: [applyMiddleware(websocketMiddleware("wss://otrom.fr/back/"))],
 });
