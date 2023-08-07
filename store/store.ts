@@ -14,5 +14,5 @@ export default configureStore({
     user: usersSlice,
     game: gameSlice,
   },
-  enhancers: [applyMiddleware(websocketMiddleware("wss://otrom.fr/back"))],
+  enhancers: [applyMiddleware(websocketMiddleware("wss://otrom.fr/back:3000/"))],
 });
