@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, SafeAreaView } from 'react-native';
-import Footer from './components/footer/footer.component';
 import { setupUser } from './components/init/init.lib';
 import MainView from './components/main-view/main-view.component';
 
@@ -30,8 +29,6 @@ export default function App() {
 		setCurrentGame(null);
 	}
 
-	const showFooter = currentGame && currentGame.status === 'started';
-
 	return (
 		userId && (
 			<SafeAreaView style={styles.container}>
@@ -42,9 +39,6 @@ export default function App() {
 					onGameStarted={handleGameStarted}
 					onLeaveGame={handleLeaveGame}
 				/>
-				{showFooter && (
-					<Footer onLeaveGame={handleLeaveGame} />
-				)}
 			</SafeAreaView>
 		)
 	);

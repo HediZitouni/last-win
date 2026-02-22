@@ -28,6 +28,6 @@ const MainView = ({ userId, currentGame, onSelectGame, onGameStarted, onLeaveGam
 		);
 	}
 
-	return <ButtonLast userId={userId} gameId={currentGame.id} />;
+	return <ButtonLast userId={userId} gameId={currentGame.id} gameName={currentGame.name} onLeaveGame={onLeaveGame} />;
 };
 export default MainView;
