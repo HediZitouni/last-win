@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
 import { background_grey, button_grey, button_grey_press, footer_grey, last_green } from '../../utils/common-styles';
-import { getGameByIdApi, startGameApi } from '../games/games.service';
+import { getGameByIdApi, startGameApi, updatePlayerNameApi } from '../games/games.service';
 import { Game } from '../games/games.type';
 
 interface WaitingRoomProps {
@@ -17,6 +17,10 @@ const WaitingRoom = ({ game, userId, onGameStarted, onLeave }: WaitingRoomProps)
 	const [currentGame, setCurrentGame] = useState<Game>(game);
 	const isCreator = currentGame.createdBy === userId;
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+	const currentPlayer = currentGame.players.find((p) => p.userId === userId);
+	const [playerName, setPlayerName] = useState(currentPlayer?.name ?? '');
+	const [nameEditing, setNameEditing] = useState(false);
 
 	useEffect(() => {
 		intervalRef.current = setInterval(async () => {
@@ -47,11 +51,53 @@ const WaitingRoom = ({ game, userId, onGameStarted, onLeave }: WaitingRoomProps)
 		}
 	}
 
+	async function handleSaveName() {
+		const trimmed = playerName.trim();
+		if (!trimmed || trimmed === currentPlayer?.name) {
+			setNameEditing(false);
+			return;
+		}
+		try {
+			const updated = await updatePlayerNameApi(currentGame.id, userId, trimmed);
+			setCurrentGame(updated);
+			setNameEditing(false);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
 				<Text style={styles.title}>{currentGame.name}</Text>
-				<Text style={styles.subtitle}>En attente des joueurs...</Text>
+				<Text style={styles.code}>{currentGame.code}</Text>
+				<Text style={styles.subtitle}>Partagez ce code pour inviter des joueurs</Text>
+			</View>
+
+			<View style={styles.nameSection}>
+				<Text style={styles.nameLabel}>Votre pseudo</Text>
+				{nameEditing ? (
+					<View style={styles.nameEditRow}>
+						<TextInput
+							style={styles.nameInput}
+							value={playerName}
+							onChangeText={setPlayerName}
+							onSubmitEditing={handleSaveName}
+							autoFocus
+							maxLength={20}
+						/>
+						<Pressable
+							style={({ pressed }) => [styles.nameSaveButton, pressed && styles.nameSaveButtonPressed]}
+							onPress={handleSaveName}
+						>
+							<Text style={styles.nameSaveText}>OK</Text>
+						</Pressable>
+					</View>
+				) : (
+					<Pressable onPress={() => setNameEditing(true)}>
+						<Text style={styles.nameDisplay}>{currentPlayer?.name ?? '...'}</Text>
+					</Pressable>
+				)}
 			</View>
 
 			<View style={styles.playersSection}>
@@ -59,13 +105,13 @@ const WaitingRoom = ({ game, userId, onGameStarted, onLeave }: WaitingRoomProps)
 					Joueurs ({currentGame.players.length})
 				</Text>
 				<ScrollView style={styles.playersList}>
-					{currentGame.players.map((playerId, index) => (
-						<View key={playerId} style={styles.playerItem}>
+					{currentGame.players.map((player) => (
+						<View key={player.userId} style={styles.playerItem}>
 							<Text style={styles.playerName}>
-								Joueur {index + 1}
-								{playerId === currentGame.createdBy ? ' (créateur)' : ''}
+								{player.name}
+								{player.userId === currentGame.createdBy ? ' (créateur)' : ''}
 							</Text>
-							{playerId === userId && (
+							{player.userId === userId && (
 								<Text style={styles.youBadge}>Vous</Text>
 							)}
 						</View>
@@ -108,9 +154,58 @@ const styles = StyleSheet.create({
 		color: 'white',
 		marginBottom: 8,
 	},
+	code: {
+		fontSize: 32,
+		fontWeight: '700',
+		color: last_green,
+		letterSpacing: 6,
+		marginBottom: 8,
+	},
 	subtitle: {
-		fontSize: 16,
+		fontSize: 14,
 		color: '#aaa',
+	},
+	nameSection: {
+		paddingHorizontal: 16,
+		marginBottom: 16,
+	},
+	nameLabel: {
+		fontSize: 14,
+		color: '#aaa',
+		marginBottom: 6,
+	},
+	nameDisplay: {
+		fontSize: 22,
+		fontWeight: '600',
+		color: last_green,
+		paddingVertical: 8,
+	},
+	nameEditRow: {
+		flexDirection: 'row',
+		gap: 8,
+	},
+	nameInput: {
+		flex: 1,
+		backgroundColor: footer_grey,
+		color: 'white',
+		paddingHorizontal: 12,
+		paddingVertical: 10,
+		borderRadius: 4,
+		fontSize: 18,
+	},
+	nameSaveButton: {
+		backgroundColor: last_green,
+		paddingHorizontal: 20,
+		borderRadius: 4,
+		justifyContent: 'center',
+	},
+	nameSaveButtonPressed: {
+		opacity: 0.8,
+	},
+	nameSaveText: {
+		color: '#222',
+		fontWeight: '600',
+		fontSize: 16,
 	},
 	playersSection: {
 		flex: 1,

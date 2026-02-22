@@ -1,18 +1,18 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
 import { background_grey, button_grey, last_green } from '../../utils/common-styles';
-import { getUsers } from '../users/users.service';
-import { User } from '../users/users.type';
+import { getPlayersApi } from '../games/games.service';
+import { Player } from '../games/games.type';
 
 const Board = ({ gameId }: { gameId: string }) => {
-	const [users, setUsers] = React.useState<User[]>([]);
+	const [players, setPlayers] = React.useState<Player[]>([]);
 	const [triggerRefresh, setTriggerRefresh] = React.useState<boolean>(false);
 
 	useEffect(() => {
-		getUsers(gameId)
-			.then((users) => {
-				users.sort((a, b) => b.score - a.score);
-				setUsers(users);
+		getPlayersApi(gameId)
+			.then((players) => {
+				players.sort((a, b) => b.score - a.score);
+				setPlayers(players);
 			})
 			.catch((error) => {
 				console.log(error);
@@ -23,14 +23,14 @@ const Board = ({ gameId }: { gameId: string }) => {
 		<>
 			<View style={styles.board_container}>
 				<ScrollView>
-					{users.map((user, index) => {
+					{players.map((player, index) => {
 						return (
-							<View style={[styles.board_item, user.isLast ? styles.board_item_last : null]} key={index}>
+							<View style={[styles.board_item, player.isLast ? styles.board_item_last : null]} key={index}>
 								<View style={styles.board_item_name}>
-									<Text>{user.name}</Text>
+									<Text>{player.name}</Text>
 								</View>
 								<View style={styles.board_item_score}>
-									<Text>{user.score}</Text>
+									<Text>{player.score}</Text>
 								</View>
 							</View>
 						);

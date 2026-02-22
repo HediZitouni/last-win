@@ -6,13 +6,13 @@ import MainView from './components/main-view/main-view.component';
 
 export default function App() {
 	const [indexView, setIndexView] = useState(0);
-	const [user, setUser] = useState(null);
+	const [userId, setUserId] = useState(null);
 	const [currentGame, setCurrentGame] = useState(null);
 
 	useEffect(() => {
 		setupUser()
 			.then((user) => {
-				setUser(user);
+				setUserId(user.id);
 			})
 			.catch((err) => {
 				console.log(err);
@@ -37,12 +37,11 @@ export default function App() {
 	const showFooter = currentGame && currentGame.status === 'started';
 
 	return (
-		user && (
+		userId && (
 			<SafeAreaView style={styles.container}>
 				<MainView
 					indexView={indexView}
-					user={user}
-					setUser={setUser}
+					userId={userId}
 					currentGame={currentGame}
 					onSelectGame={handleSelectGame}
 					onGameStarted={handleGameStarted}

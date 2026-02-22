@@ -15,11 +15,8 @@ const Footer = ({ setIndexView, onLeaveGame }) => {
 			<View style={styles.footer_item_middle}>
 				<Button title="Last" color={button_grey} onPress={() => handleClick(0)}></Button>
 			</View>
-			<View style={styles.footer_item_middle}>
-				<Button title="Board" color={button_grey} onPress={() => handleClick(1)}></Button>
-			</View>
 			<View style={styles.footer_item}>
-				<Button title="Settings" color={button_grey} onPress={() => handleClick(2)}></Button>
+				<Button title="Board" color={button_grey} onPress={() => handleClick(1)}></Button>
 			</View>
 		</View>
 	);
