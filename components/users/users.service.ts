@@ -4,14 +4,15 @@ import { User } from "./users.type";
 import { __retrieveDeviceId, __retrieveUserId, __storeDeviceId } from "./users.store";
 import { UserData } from "../user-input/user-input.type";
 
-async function getUsers(): Promise<User[]> {
-  const response = await callApi(HTTP_METHODS.GET, "users");
+async function getUsers(gameId?: string): Promise<User[]> {
+  const params: string[][] = gameId ? [["gameId", gameId]] : [];
+  const response = await callApi(HTTP_METHODS.GET, "users", undefined, params.length ? params : undefined);
   const users: User[] = await response.json();
   return users;
 }
 
-async function setLast(id: string) {
-  await callApi(HTTP_METHODS.PUT, "last", { id });
+async function setLast(id: string, gameId: string) {
+  await callApi(HTTP_METHODS.PUT, "last", { id, gameId });
 }
 
 async function getOrCreateUser(deviceId: string): Promise<User> {
@@ -27,8 +28,10 @@ async function updateUser(userData: UserData): Promise<User> {
   return updatedUser;
 }
 
-async function getUserById(id: string): Promise<User> {
-  const response = await callApi(HTTP_METHODS.GET, "user", undefined, [["id", id]]);
+async function getUserById(id: string, gameId?: string): Promise<User> {
+  const params: string[][] = [["id", id]];
+  if (gameId) params.push(["gameId", gameId]);
+  const response = await callApi(HTTP_METHODS.GET, "user", undefined, params);
   const user: User = await response.json();
   return user;
 }

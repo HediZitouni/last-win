@@ -5,8 +5,7 @@ const HTTP_METHODS = {
 	DELETE: 'DELETE',
 };
 
-const API_ADRESS = 'https://otrom.fr/lastwin/api/';
-//const API_ADRESS = 'http://localhost:3000/api/';
+const API_ADRESS = process.env.EXPO_PUBLIC_API_URL || 'https://otrom.fr/lastwin/api/';
 
 const storeVersion = '0.0.1';
 export { HTTP_METHODS, API_ADRESS, storeVersion };

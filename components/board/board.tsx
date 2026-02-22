@@ -4,12 +4,12 @@ import { background_grey, button_grey, last_green } from '../../utils/common-sty
 import { getUsers } from '../users/users.service';
 import { User } from '../users/users.type';
 
-const Board = () => {
+const Board = ({ gameId }: { gameId: string }) => {
 	const [users, setUsers] = React.useState<User[]>([]);
 	const [triggerRefresh, setTriggerRefresh] = React.useState<boolean>(false);
 
 	useEffect(() => {
-		getUsers()
+		getUsers(gameId)
 			.then((users) => {
 				users.sort((a, b) => b.score - a.score);
 				setUsers(users);

@@ -5,12 +5,12 @@ import { getUserById, setLast } from '../users/users.service';
 import { __retrieveUserId, __storeUserId } from '../users/users.store';
 import { User } from '../users/users.type';
 
-const ButtonLast = ({ user }) => {
+const ButtonLast = ({ user, gameId }: { user: User; gameId: string }) => {
 	const [{ id, name, score, credit, isLast }, setUser] = React.useState<User | null>(user);
 	const [triggerRefresh, setTriggerRefresh] = React.useState<boolean>(false);
 
 	useEffect(() => {
-		getUserById(id)
+		getUserById(id, gameId)
 			.then((user) => {
 				setUser(user);
 			})
@@ -20,7 +20,7 @@ const ButtonLast = ({ user }) => {
 	}, [triggerRefresh]);
 
 	async function addCount() {
-		await setLast(id);
+		await setLast(id, gameId);
 		setTriggerRefresh((prev) => !prev);
 	}
 
