@@ -5,7 +5,6 @@ import { setupUser } from './components/init/init.lib';
 import MainView from './components/main-view/main-view.component';
 
 export default function App() {
-	const [indexView, setIndexView] = useState(0);
 	const [userId, setUserId] = useState(null);
 	const [currentGame, setCurrentGame] = useState(null);
 
@@ -21,17 +20,14 @@ export default function App() {
 
 	function handleSelectGame(game) {
 		setCurrentGame(game);
-		setIndexView(0);
 	}
 
 	function handleGameStarted(game) {
 		setCurrentGame(game);
-		setIndexView(0);
 	}
 
 	function handleLeaveGame() {
 		setCurrentGame(null);
-		setIndexView(0);
 	}
 
 	const showFooter = currentGame && currentGame.status === 'started';
@@ -40,7 +36,6 @@ export default function App() {
 		userId && (
 			<SafeAreaView style={styles.container}>
 				<MainView
-					indexView={indexView}
 					userId={userId}
 					currentGame={currentGame}
 					onSelectGame={handleSelectGame}
@@ -48,7 +43,7 @@ export default function App() {
 					onLeaveGame={handleLeaveGame}
 				/>
 				{showFooter && (
-					<Footer setIndexView={setIndexView} onLeaveGame={handleLeaveGame} />
+					<Footer onLeaveGame={handleLeaveGame} />
 				)}
 			</SafeAreaView>
 		)
