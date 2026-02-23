@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch, TextInput } from 'react-native';
-import { background_grey, button_grey, button_grey_press, footer_grey, last_green } from '../../utils/common-styles';
+import { background_grey, button_grey, footer_grey, last_green } from '../../utils/common-styles';
 import { updateGameSettingsApi } from '../games/games.service';
 import { Game, GameSettings } from '../games/games.type';
 
@@ -11,22 +11,18 @@ interface GameConfigProps {
 	onLeave: () => void;
 }
 
-const TIME_PRESETS = [5, 10, 15, 30, 60, 120, 360, 720, 1440];
-
-function formatTimePreset(minutes: number): string {
-	if (minutes < 60) return `${minutes} min`;
-	const h = minutes / 60;
-	return h === 1 ? '1 heure' : `${h} heures`;
-}
-
 function clamp(value: number, min: number, max: number): number {
 	return Math.max(min, Math.min(max, value));
 }
 
 const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) => {
 	const [settings, setSettings] = useState<GameSettings>({ ...game.settings });
-	const [timeLimitEnabled, setTimeLimitEnabled] = useState(settings.timeLimitMinutes !== null);
+	const [timeLimitEnabled, setTimeLimitEnabled] = useState(settings.timeLimitSeconds !== null);
 	const [saving, setSaving] = useState(false);
+
+	const [maxPlayersText, setMaxPlayersText] = useState(String(settings.maxPlayers));
+	const [maxCreditsText, setMaxCreditsText] = useState(String(settings.maxCredits));
+	const [timeLimitText, setTimeLimitText] = useState(String(settings.timeLimitSeconds ?? ''));
 
 	function updateSetting<K extends keyof GameSettings>(key: K, value: GameSettings[K]) {
 		setSettings((prev) => ({ ...prev, [key]: value }));
@@ -34,13 +30,56 @@ const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) =>
 
 	function handleTimeLimitToggle(enabled: boolean) {
 		setTimeLimitEnabled(enabled);
-		updateSetting('timeLimitMinutes', enabled ? 30 : null);
+		if (enabled) {
+			const defaultSeconds = 60;
+			setTimeLimitText(String(defaultSeconds));
+			updateSetting('timeLimitSeconds', defaultSeconds);
+		} else {
+			setTimeLimitText('');
+			updateSetting('timeLimitSeconds', null);
+		}
 	}
 
-	function parseNumericInput(text: string, min: number, max: number, fallback: number): number {
+	function handleBlurNumeric(text: string, min: number, max: number, setter: (v: string) => void, settingKey: keyof GameSettings) {
 		const parsed = parseInt(text, 10);
-		if (isNaN(parsed)) return fallback;
-		return clamp(parsed, min, max);
+		if (isNaN(parsed) || text.trim() === '') {
+			const val = min;
+			setter(String(val));
+			updateSetting(settingKey, val as any);
+		} else {
+			const clamped = clamp(parsed, min, max);
+			setter(String(clamped));
+			updateSetting(settingKey, clamped as any);
+		}
+	}
+
+	function handleChangeNumeric(text: string, setter: (v: string) => void, settingKey: keyof GameSettings) {
+		const cleaned = text.replace(/[^0-9]/g, '');
+		setter(cleaned);
+		const parsed = parseInt(cleaned, 10);
+		if (!isNaN(parsed)) {
+			updateSetting(settingKey, parsed as any);
+		}
+	}
+
+	function handleTimeLimitChange(text: string) {
+		const cleaned = text.replace(/[^0-9]/g, '');
+		setTimeLimitText(cleaned);
+		const parsed = parseInt(cleaned, 10);
+		updateSetting('timeLimitSeconds', isNaN(parsed) ? null : parsed);
+	}
+
+	function handleTimeLimitBlur() {
+		const parsed = parseInt(timeLimitText, 10);
+		if (isNaN(parsed) || timeLimitText.trim() === '') {
+			const val = 1;
+			setTimeLimitText(String(val));
+			updateSetting('timeLimitSeconds', val);
+		} else {
+			const clamped = Math.max(1, parsed);
+			setTimeLimitText(String(clamped));
+			updateSetting('timeLimitSeconds', clamped);
+		}
 	}
 
 	async function handleConfirm() {
@@ -78,8 +117,9 @@ const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) =>
 						<TextInput
 							style={styles.numericInput}
 							keyboardType="number-pad"
-							value={String(settings.maxPlayers)}
-							onChangeText={(t) => updateSetting('maxPlayers', parseNumericInput(t, 2, 50, settings.maxPlayers))}
+							value={maxPlayersText}
+							onChangeText={(t) => handleChangeNumeric(t, setMaxPlayersText, 'maxPlayers')}
+							onBlur={() => handleBlurNumeric(maxPlayersText, 2, 50, setMaxPlayersText, 'maxPlayers')}
 							maxLength={2}
 						/>
 					</View>
@@ -92,8 +132,9 @@ const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) =>
 						<TextInput
 							style={styles.numericInput}
 							keyboardType="number-pad"
-							value={String(settings.maxCredits)}
-							onChangeText={(t) => updateSetting('maxCredits', parseNumericInput(t, 1, 100, settings.maxCredits))}
+							value={maxCreditsText}
+							onChangeText={(t) => handleChangeNumeric(t, setMaxCreditsText, 'maxCredits')}
+							onBlur={() => handleBlurNumeric(maxCreditsText, 1, 100, setMaxCreditsText, 'maxCredits')}
 							maxLength={3}
 						/>
 					</View>
@@ -116,26 +157,18 @@ const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) =>
 					</View>
 
 					{timeLimitEnabled && (
-						<View style={styles.presetsContainer}>
-							{TIME_PRESETS.map((minutes) => (
-								<Pressable
-									key={minutes}
-									style={[
-										styles.presetChip,
-										settings.timeLimitMinutes === minutes && styles.presetChipActive,
-									]}
-									onPress={() => updateSetting('timeLimitMinutes', minutes)}
-								>
-									<Text
-										style={[
-											styles.presetChipText,
-											settings.timeLimitMinutes === minutes && styles.presetChipTextActive,
-										]}
-									>
-										{formatTimePreset(minutes)}
-									</Text>
-								</Pressable>
-							))}
+						<View style={styles.row}>
+							<View style={styles.rowLabel}>
+								<Text style={styles.rowTitle}>Durée (secondes)</Text>
+							</View>
+							<TextInput
+								style={styles.numericInput}
+								keyboardType="number-pad"
+								value={timeLimitText}
+								onChangeText={handleTimeLimitChange}
+								onBlur={handleTimeLimitBlur}
+								maxLength={7}
+							/>
 						</View>
 					)}
 				</View>
@@ -291,34 +324,9 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		fontWeight: '600',
 		textAlign: 'center',
-		width: 60,
+		width: 80,
 		paddingVertical: 8,
 		borderRadius: 8,
-	},
-	presetsContainer: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		paddingHorizontal: 12,
-		paddingBottom: 14,
-		gap: 8,
-	},
-	presetChip: {
-		paddingHorizontal: 14,
-		paddingVertical: 8,
-		borderRadius: 20,
-		backgroundColor: background_grey,
-	},
-	presetChipActive: {
-		backgroundColor: last_green,
-	},
-	presetChipText: {
-		color: '#ccc',
-		fontSize: 14,
-		fontWeight: '500',
-	},
-	presetChipTextActive: {
-		color: '#1a1a1a',
-		fontWeight: '700',
 	},
 	actions: {
 		padding: 16,

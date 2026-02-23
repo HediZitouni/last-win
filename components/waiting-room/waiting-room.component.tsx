@@ -13,11 +13,13 @@ interface WaitingRoomProps {
 
 const POLL_INTERVAL = 3000;
 
-function formatTimeLimit(minutes: number | null): string {
-	if (minutes === null) return 'Illimitée';
-	if (minutes < 60) return `${minutes} min`;
-	const h = minutes / 60;
-	return h === 1 ? '1 heure' : `${h} heures`;
+function formatTimeLimit(seconds: number | null): string {
+	if (seconds === null) return 'Illimitée';
+	if (seconds < 60) return `${seconds}s`;
+	if (seconds < 3600) return `${Math.floor(seconds / 60)} min ${seconds % 60 > 0 ? `${seconds % 60}s` : ''}`.trim();
+	const h = Math.floor(seconds / 3600);
+	const m = Math.floor((seconds % 3600) / 60);
+	return m > 0 ? `${h}h ${m}min` : `${h}h`;
 }
 
 function settingsLine(label: string, value: string): React.ReactNode {
@@ -120,7 +122,7 @@ const WaitingRoom = ({ game, userId, onGameStarted, onLeave }: WaitingRoomProps)
 				<Text style={settingsStyles.title}>Règles</Text>
 				{settingsLine('Joueurs max', String(currentGame.settings.maxPlayers))}
 				{settingsLine('Crédits', String(currentGame.settings.maxCredits))}
-				{settingsLine('Durée', formatTimeLimit(currentGame.settings.timeLimitMinutes))}
+				{settingsLine('Durée', formatTimeLimit(currentGame.settings.timeLimitSeconds))}
 				{settingsLine('Voir crédits des autres', currentGame.settings.showOtherCredits ? 'Oui' : 'Non')}
 				{settingsLine('Voir scores des autres', currentGame.settings.showOtherScores ? 'Oui' : 'Non')}
 				{settingsLine('Voir qui est Last', currentGame.settings.showOtherIsLast ? 'Oui' : 'Non')}

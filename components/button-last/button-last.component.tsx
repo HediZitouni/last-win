@@ -31,7 +31,7 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 	const elapsedRef = useRef(0);
 	const [timeExpired, setTimeExpired] = useState(false);
 
-	const hasTimeLimit = settings.timeLimitMinutes !== null && game.startedAt !== null;
+	const hasTimeLimit = settings.timeLimitSeconds !== null && game.startedAt !== null;
 
 	const applyPlayers = useCallback((allPlayers: Player[]) => {
 		setElapsed(0);
@@ -66,17 +66,17 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 
 			if (hasTimeLimit) {
 				const now = Math.round(Date.now() / 1000);
-				const endTime = game.startedAt! + settings.timeLimitMinutes! * 60;
+				const endTime = game.startedAt! + settings.timeLimitSeconds!;
 				if (now >= endTime) setTimeExpired(true);
 			}
 		}, 1000);
 		return () => clearInterval(id);
-	}, [hasTimeLimit, game.startedAt, settings.timeLimitMinutes]);
+	}, [hasTimeLimit, game.startedAt, settings.timeLimitSeconds]);
 
 	function getRemainingSeconds(): number {
 		if (!hasTimeLimit) return 0;
 		const now = Math.round(Date.now() / 1000);
-		const endTime = game.startedAt! + settings.timeLimitMinutes! * 60;
+		const endTime = game.startedAt! + settings.timeLimitSeconds!;
 		return Math.max(0, endTime - now);
 	}
 
