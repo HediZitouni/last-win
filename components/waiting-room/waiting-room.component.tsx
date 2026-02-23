@@ -13,6 +13,22 @@ interface WaitingRoomProps {
 
 const POLL_INTERVAL = 3000;
 
+function formatTimeLimit(minutes: number | null): string {
+	if (minutes === null) return 'Illimitée';
+	if (minutes < 60) return `${minutes} min`;
+	const h = minutes / 60;
+	return h === 1 ? '1 heure' : `${h} heures`;
+}
+
+function settingsLine(label: string, value: string): React.ReactNode {
+	return (
+		<View key={label} style={settingsStyles.row}>
+			<Text style={settingsStyles.label}>{label}</Text>
+			<Text style={settingsStyles.value}>{value}</Text>
+		</View>
+	);
+}
+
 const WaitingRoom = ({ game, userId, onGameStarted, onLeave }: WaitingRoomProps) => {
 	const [currentGame, setCurrentGame] = useState<Game>(game);
 	const isCreator = currentGame.createdBy === userId;
@@ -100,9 +116,19 @@ const WaitingRoom = ({ game, userId, onGameStarted, onLeave }: WaitingRoomProps)
 				)}
 			</View>
 
+			<View style={settingsStyles.container}>
+				<Text style={settingsStyles.title}>Règles</Text>
+				{settingsLine('Joueurs max', String(currentGame.settings.maxPlayers))}
+				{settingsLine('Crédits', String(currentGame.settings.maxCredits))}
+				{settingsLine('Durée', formatTimeLimit(currentGame.settings.timeLimitMinutes))}
+				{settingsLine('Voir crédits des autres', currentGame.settings.showOtherCredits ? 'Oui' : 'Non')}
+				{settingsLine('Voir scores des autres', currentGame.settings.showOtherScores ? 'Oui' : 'Non')}
+				{settingsLine('Voir qui est Last', currentGame.settings.showOtherIsLast ? 'Oui' : 'Non')}
+			</View>
+
 			<View style={styles.playersSection}>
 				<Text style={styles.playersTitle}>
-					Joueurs ({currentGame.players.length})
+					Joueurs ({currentGame.players.length}/{currentGame.settings.maxPlayers})
 				</Text>
 				<ScrollView style={styles.playersList}>
 					{currentGame.players.map((player) => (
@@ -269,6 +295,39 @@ const styles = StyleSheet.create({
 		color: 'white',
 		fontSize: 16,
 		fontWeight: '500',
+	},
+});
+
+const settingsStyles = StyleSheet.create({
+	container: {
+		marginHorizontal: 16,
+		marginBottom: 16,
+		backgroundColor: footer_grey,
+		borderRadius: 8,
+		paddingVertical: 10,
+		paddingHorizontal: 14,
+	},
+	title: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: '#999',
+		textTransform: 'uppercase',
+		letterSpacing: 1,
+		marginBottom: 8,
+	},
+	row: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		paddingVertical: 4,
+	},
+	label: {
+		fontSize: 14,
+		color: '#bbb',
+	},
+	value: {
+		fontSize: 14,
+		color: 'white',
+		fontWeight: '600',
 	},
 });
 

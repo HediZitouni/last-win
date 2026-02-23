@@ -1,6 +1,6 @@
 import { callApi } from '../../utils/api';
 import { HTTP_METHODS } from '../../utils/constants';
-import { Game, Player } from './games.type';
+import { Game, GameSettings, Player } from './games.type';
 
 export async function getMyGames(userId: string): Promise<Game[]> {
 	const response = await callApi(HTTP_METHODS.GET, `games?userId=${userId}`);
@@ -54,6 +54,12 @@ export async function getPlayerApi(gameId: string, userId: string): Promise<Play
 	const response = await callApi(HTTP_METHODS.GET, `games/${gameId}/player?userId=${userId}`);
 	const player: Player = await response.json();
 	return player;
+}
+
+export async function updateGameSettingsApi(gameId: string, userId: string, settings: GameSettings): Promise<Game> {
+	const response = await callApi(HTTP_METHODS.PUT, `games/${gameId}/settings`, { userId, settings });
+	const game: Game = await response.json();
+	return game;
 }
 
 export async function setLastApi(userId: string, gameId: string): Promise<void> {

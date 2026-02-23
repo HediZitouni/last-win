@@ -1,5 +1,6 @@
 import React from 'react';
 import ButtonLast from '../button-last/button-last.component';
+import GameConfig from '../game-config/game-config.component';
 import Lobby from '../lobby/lobby.component';
 import WaitingRoom from '../waiting-room/waiting-room.component';
 import { Game } from '../games/games.type';
@@ -17,6 +18,10 @@ const MainView = ({ userId, currentGame, onSelectGame, onGameStarted, onLeaveGam
 		return <Lobby userId={userId} onSelectGame={onSelectGame} />;
 	}
 
+	if (currentGame.status === 'waiting' && !currentGame.configured && currentGame.createdBy === userId) {
+		return <GameConfig game={currentGame} userId={userId} onConfigured={onSelectGame} onLeave={onLeaveGame} />;
+	}
+
 	if (currentGame.status === 'waiting') {
 		return (
 			<WaitingRoom
@@ -28,6 +33,6 @@ const MainView = ({ userId, currentGame, onSelectGame, onGameStarted, onLeaveGam
 		);
 	}
 
-	return <ButtonLast userId={userId} gameId={currentGame.id} gameName={currentGame.name} onLeaveGame={onLeaveGame} />;
+	return <ButtonLast userId={userId} gameId={currentGame.id} game={currentGame} onLeaveGame={onLeaveGame} />;
 };
 export default MainView;

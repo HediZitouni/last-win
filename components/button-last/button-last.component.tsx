@@ -1,31 +1,48 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { View, StyleSheet, Text, Pressable, ScrollView } from 'react-native';
 import { background_grey, button_grey, button_grey_press, footer_grey, last_green } from '../../utils/common-styles';
 import { getPlayersApi, setLastApi } from '../games/games.service';
-import { Player } from '../games/games.type';
+import { Game, GameSettings, Player } from '../games/games.type';
 import { getSocket } from '../../utils/socket';
 
 interface ButtonLastProps {
 	userId: string;
 	gameId: string;
-	gameName: string;
+	game: Game;
 	onLeaveGame: () => void;
 }
 
-const ButtonLast = ({ userId, gameId, gameName, onLeaveGame }: ButtonLastProps) => {
-	const [player, setPlayer] = React.useState<Player | null>(null);
-	const [players, setPlayers] = React.useState<Player[]>([]);
-	const [elapsed, setElapsed] = React.useState(0);
+function formatCountdown(totalSeconds: number): string {
+	if (totalSeconds <= 0) return '00:00';
+	const h = Math.floor(totalSeconds / 3600);
+	const m = Math.floor((totalSeconds % 3600) / 60);
+	const s = totalSeconds % 60;
+	const pad = (n: number) => String(n).padStart(2, '0');
+	return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+
+const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
+	const settings: GameSettings = game.settings;
+	const gameName = game.name;
+
+	const [player, setPlayer] = useState<Player | null>(null);
+	const [players, setPlayers] = useState<Player[]>([]);
+	const [elapsed, setElapsed] = useState(0);
 	const elapsedRef = useRef(0);
+	const [timeExpired, setTimeExpired] = useState(false);
+
+	const hasTimeLimit = settings.timeLimitMinutes !== null && game.startedAt !== null;
 
 	const applyPlayers = useCallback((allPlayers: Player[]) => {
 		setElapsed(0);
 		elapsedRef.current = 0;
-		const sorted = [...allPlayers].sort((a, b) => b.score - a.score);
+		const sorted = settings.showOtherScores
+			? [...allPlayers].sort((a, b) => b.score - a.score)
+			: allPlayers;
 		setPlayers(sorted);
 		const me = sorted.find((p) => p.userId === userId);
 		if (me) setPlayer(me);
-	}, [userId]);
+	}, [userId, settings.showOtherScores]);
 
 	useEffect(() => {
 		getPlayersApi(gameId)
@@ -46,12 +63,25 @@ const ButtonLast = ({ userId, gameId, gameName, onLeaveGame }: ButtonLastProps) 
 		const id = setInterval(() => {
 			elapsedRef.current += 1;
 			setElapsed(elapsedRef.current);
+
+			if (hasTimeLimit) {
+				const now = Math.round(Date.now() / 1000);
+				const endTime = game.startedAt! + settings.timeLimitMinutes! * 60;
+				if (now >= endTime) setTimeExpired(true);
+			}
 		}, 1000);
 		return () => clearInterval(id);
-	}, []);
+	}, [hasTimeLimit, game.startedAt, settings.timeLimitMinutes]);
+
+	function getRemainingSeconds(): number {
+		if (!hasTimeLimit) return 0;
+		const now = Math.round(Date.now() / 1000);
+		const endTime = game.startedAt! + settings.timeLimitMinutes! * 60;
+		return Math.max(0, endTime - now);
+	}
 
 	async function addCount() {
-		if (!player || player.credit < 1 || player.isLast) return;
+		if (!player || player.credit < 1 || player.isLast || timeExpired) return;
 		await setLastApi(userId, gameId);
 	}
 
@@ -67,7 +97,23 @@ const ButtonLast = ({ userId, gameId, gameName, onLeaveGame }: ButtonLastProps) 
 
 	const isLast = !!player.isLast;
 	const lastPlayer = players.find((p) => p.isLast);
-	const canAct = !isLast && player.credit >= 1;
+	const canAct = !isLast && player.credit >= 1 && !timeExpired;
+
+	function renderStatusText() {
+		if (timeExpired) {
+			return <Text style={styles.status_text_expired}>Partie terminée !</Text>;
+		}
+		if (!lastPlayer) {
+			return <Text style={styles.status_text}>Personne n'est le dernier</Text>;
+		}
+		if (isLast) {
+			return <Text style={[styles.status_text, styles.status_text_last]}>C'est toi le dernier !</Text>;
+		}
+		if (settings.showOtherIsLast) {
+			return <Text style={styles.status_text}>{lastPlayer.name} est le dernier</Text>;
+		}
+		return <Text style={styles.status_text}>Un joueur est le dernier</Text>;
+	}
 
 	return (
 		<View style={styles.container}>
@@ -75,6 +121,11 @@ const ButtonLast = ({ userId, gameId, gameName, onLeaveGame }: ButtonLastProps) 
 				<Pressable style={({ pressed }) => [styles.back_button, pressed && styles.back_pressed]} onPress={onLeaveGame}>
 					<Text style={styles.back_text}>Parties</Text>
 				</Pressable>
+				{hasTimeLimit && (
+					<Text style={[styles.timer_text, timeExpired && styles.timer_text_expired]}>
+						{formatCountdown(getRemainingSeconds())}
+					</Text>
+				)}
 			</View>
 
 			<View style={styles.hero}>
@@ -97,13 +148,7 @@ const ButtonLast = ({ userId, gameId, gameName, onLeaveGame }: ButtonLastProps) 
 			</View>
 
 			<View style={styles.status_area}>
-				{lastPlayer ? (
-					<Text style={[styles.status_text, isLast && styles.status_text_last]}>
-						{isLast ? 'C\'est toi le dernier !' : `${lastPlayer.name} est le dernier`}
-					</Text>
-				) : (
-					<Text style={styles.status_text}>Personne n'est le dernier</Text>
-				)}
+				{renderStatusText()}
 			</View>
 
 			<View style={styles.action_area}>
@@ -118,7 +163,7 @@ const ButtonLast = ({ userId, gameId, gameName, onLeaveGame }: ButtonLastProps) 
 				>
 					<Text style={styles.action_text}>LAST !</Text>
 				</Pressable>
-				{!canAct && !isLast && player.credit < 1 && (
+				{!canAct && !isLast && !timeExpired && player.credit < 1 && (
 					<Text style={styles.no_credit_hint}>Plus de crédits</Text>
 				)}
 			</View>
@@ -134,29 +179,31 @@ const ButtonLast = ({ userId, gameId, gameName, onLeaveGame }: ButtonLastProps) 
 					{players.map((p, index) => {
 						const isMe = p.userId === userId;
 						const pIsLast = !!p.isLast;
+						const showLast = isMe ? pIsLast : pIsLast && settings.showOtherIsLast;
+
 						return (
 							<View
 								key={p.userId}
 								style={[
 									styles.board_row,
-									pIsLast && styles.board_row_last,
-									isMe && !pIsLast && styles.board_row_me,
+									showLast && styles.board_row_last,
+									isMe && !showLast && styles.board_row_me,
 								]}
 							>
-								<Text style={[styles.board_cell, styles.rank_col, styles.rank_text, pIsLast && styles.board_cell_dark]}>
+								<Text style={[styles.board_cell, styles.rank_col, styles.rank_text, showLast && styles.board_cell_dark]}>
 									{index + 1}
 								</Text>
 								<View style={[styles.name_col, styles.name_cell_inner]}>
-									<Text style={[styles.board_cell, pIsLast && styles.board_cell_dark]} numberOfLines={1}>
+									<Text style={[styles.board_cell, showLast && styles.board_cell_dark]} numberOfLines={1}>
 										{p.name}
 									</Text>
-									{isMe && <View style={[styles.me_dot, pIsLast && styles.me_dot_dark]} />}
+									{isMe && <View style={[styles.me_dot, showLast && styles.me_dot_dark]} />}
 								</View>
-								<Text style={[styles.board_cell, styles.credit_col, styles.credit_cell_text, pIsLast && styles.board_cell_dark]}>
-									{p.credit}
+								<Text style={[styles.board_cell, styles.credit_col, styles.credit_cell_text, showLast && styles.board_cell_dark]}>
+									{isMe || settings.showOtherCredits ? p.credit : '--'}
 								</Text>
-								<Text style={[styles.board_cell, styles.score_col, styles.score_cell_text, pIsLast && styles.board_cell_dark]}>
-									{formatScore(displayScore(p))}
+								<Text style={[styles.board_cell, styles.score_col, styles.score_cell_text, showLast && styles.board_cell_dark]}>
+									{isMe || settings.showOtherScores ? formatScore(displayScore(p)) : '--'}
 								</Text>
 							</View>
 						);
@@ -193,6 +240,15 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '500',
 	},
+	timer_text: {
+		color: '#ccc',
+		fontSize: 16,
+		fontWeight: '700',
+		fontVariant: ['tabular-nums'] as any,
+	},
+	timer_text_expired: {
+		color: '#ff4444',
+	},
 
 	hero: {
 		alignItems: 'center',
@@ -226,7 +282,7 @@ const styles = StyleSheet.create({
 		fontSize: 36,
 		fontWeight: '800',
 		color: 'white',
-		fontVariant: ['tabular-nums'],
+		fontVariant: ['tabular-nums'] as any,
 	},
 	stat_value_dark: {
 		color: '#1a1a1a',
@@ -260,6 +316,11 @@ const styles = StyleSheet.create({
 	},
 	status_text_last: {
 		color: last_green,
+		fontWeight: '700',
+	},
+	status_text_expired: {
+		fontSize: 15,
+		color: '#ff4444',
 		fontWeight: '700',
 	},
 
@@ -369,7 +430,7 @@ const styles = StyleSheet.create({
 	},
 	credit_cell_text: {
 		textAlign: 'center',
-		fontVariant: ['tabular-nums'],
+		fontVariant: ['tabular-nums'] as any,
 	},
 	score_col: {
 		width: 80,
@@ -377,7 +438,7 @@ const styles = StyleSheet.create({
 	},
 	score_cell_text: {
 		fontWeight: '600',
-		fontVariant: ['tabular-nums'],
+		fontVariant: ['tabular-nums'] as any,
 		textAlign: 'right',
 	},
 });
