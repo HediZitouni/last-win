@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
 import { background_grey, button_grey, button_grey_press, footer_grey, last_green } from '../../utils/common-styles';
 import { getMyGames, createGameApi, joinGameByCodeApi, rejoinGameApi } from '../games/games.service';
 import { Game } from '../games/games.type';
+import { getSocket } from '../../utils/socket';
 
 interface LobbyProps {
 	userId: string;
@@ -16,20 +17,54 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
 	const [loading, setLoading] = useState(true);
 	const [joinError, setJoinError] = useState('');
 
+	const [, forceRender] = useState(0);
+	const expirationTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+	const scheduleExpirationTimers = useCallback((gameList: Game[]) => {
+		expirationTimers.current.forEach(clearTimeout);
+		expirationTimers.current = [];
+		const now = Math.round(Date.now() / 1000);
+		for (const g of gameList) {
+			if (g.status !== 'started' || !g.startedAt || !g.settings.timeLimitSeconds) continue;
+			const remaining = (g.startedAt + g.settings.timeLimitSeconds) - now;
+			if (remaining > 0) {
+				const timer = setTimeout(() => forceRender((n) => n + 1), remaining * 1000);
+				expirationTimers.current.push(timer);
+			}
+		}
+	}, []);
+
 	useEffect(() => {
 		loadGames();
+		return () => expirationTimers.current.forEach(clearTimeout);
 	}, []);
 
 	async function loadGames() {
 		try {
-			const games = await getMyGames(userId);
-			setGames(games);
+			const gameList = await getMyGames(userId);
+			setGames(gameList);
+			scheduleExpirationTimers(gameList);
 		} catch (e) {
 			console.log(e);
 		} finally {
 			setLoading(false);
 		}
 	}
+
+	useEffect(() => {
+		const socket = getSocket();
+		for (const g of games) {
+			socket.emit('join-game', g.id);
+		}
+		socket.on('game-updated', (updated: Game) => {
+			setGames((prev) => {
+				const next = prev.map((g) => (g.id === updated.id ? updated : g));
+				scheduleExpirationTimers(next);
+				return next;
+			});
+		});
+		return () => { socket.off('game-updated'); };
+	}, [games.length, scheduleExpirationTimers]);
 
 	async function handleCreateGame() {
 		const name = newGameName.trim();
@@ -134,13 +169,17 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
 					)}
 					{games.map((game) => {
 						const isStarted = game.status === 'started';
+						const isExpired = isStarted
+							&& game.startedAt !== null
+							&& game.settings.timeLimitSeconds !== null
+							&& Math.round(Date.now() / 1000) >= game.startedAt + game.settings.timeLimitSeconds;
 						const playerCount = game.players?.length ?? 0;
 						return (
 							<Pressable
 								key={game.id}
 								style={({ pressed }) => [
 									styles.gameItem,
-									isStarted && styles.gameItemStarted,
+									isStarted && !isExpired && styles.gameItemStarted,
 									pressed && styles.gameItemPressed,
 								]}
 								onPress={() => handleSelectGame(game)}
@@ -152,9 +191,12 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
 									</Text>
 								</View>
 								<View style={styles.gameRight}>
-									<View style={[styles.statusBadge, isStarted ? styles.statusStarted : styles.statusWaiting]}>
-										<Text style={styles.statusText}>
-											{isStarted ? 'Rejoindre' : 'En attente'}
+									<View style={[
+										styles.statusBadge,
+										isExpired ? styles.statusFinished : isStarted ? styles.statusStarted : styles.statusWaiting,
+									]}>
+										<Text style={[styles.statusText, isExpired && styles.statusTextFinished]}>
+											{isExpired ? 'Partie terminée' : isStarted ? 'Rejoindre' : 'En attente'}
 										</Text>
 									</View>
 									<Text style={styles.gameMeta}>{formatDate(game.createdAt)}</Text>
@@ -286,15 +328,21 @@ const styles = StyleSheet.create({
 		borderRadius: 3,
 	},
 	statusWaiting: {
-		backgroundColor: button_grey,
+		backgroundColor: '#FF9500',
 	},
 	statusStarted: {
 		backgroundColor: last_green,
+	},
+	statusFinished: {
+		backgroundColor: '#ff4444',
 	},
 	statusText: {
 		fontSize: 12,
 		fontWeight: '600',
 		color: '#222',
+	},
+	statusTextFinished: {
+		color: 'white',
 	},
 });
 
