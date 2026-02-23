@@ -29,9 +29,15 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 	const [players, setPlayers] = useState<Player[]>([]);
 	const [elapsed, setElapsed] = useState(0);
 	const elapsedRef = useRef(0);
-	const [timeExpired, setTimeExpired] = useState(false);
-
 	const hasTimeLimit = settings.timeLimitSeconds !== null && game.startedAt !== null;
+
+	function isGameExpired(): boolean {
+		if (!hasTimeLimit) return false;
+		const now = Math.round(Date.now() / 1000);
+		return now >= game.startedAt! + settings.timeLimitSeconds!;
+	}
+
+	const [timeExpired, setTimeExpired] = useState(isGameExpired);
 
 	const applyPlayers = useCallback((allPlayers: Player[]) => {
 		setElapsed(0);
@@ -60,18 +66,27 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 	}, [gameId, applyPlayers]);
 
 	useEffect(() => {
+		if (timeExpired) {
+			getPlayersApi(gameId)
+				.then((p) => applyPlayers(p))
+				.catch((error) => console.log(error));
+			return;
+		}
 		const id = setInterval(() => {
-			elapsedRef.current += 1;
-			setElapsed(elapsedRef.current);
-
 			if (hasTimeLimit) {
 				const now = Math.round(Date.now() / 1000);
 				const endTime = game.startedAt! + settings.timeLimitSeconds!;
-				if (now >= endTime) setTimeExpired(true);
+				if (now >= endTime) {
+					setTimeExpired(true);
+					clearInterval(id);
+					return;
+				}
 			}
+			elapsedRef.current += 1;
+			setElapsed(elapsedRef.current);
 		}, 1000);
 		return () => clearInterval(id);
-	}, [hasTimeLimit, game.startedAt, settings.timeLimitSeconds]);
+	}, [hasTimeLimit, game.startedAt, settings.timeLimitSeconds, timeExpired, gameId, applyPlayers]);
 
 	function getRemainingSeconds(): number {
 		if (!hasTimeLimit) return 0;
@@ -95,8 +110,8 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 
 	if (!player) return null;
 
-	const isLast = !!player.isLast;
-	const lastPlayer = players.find((p) => p.isLast);
+	const isLast = !timeExpired && !!player.isLast;
+	const lastPlayer = !timeExpired ? players.find((p) => p.isLast) : undefined;
 	const canAct = !isLast && player.credit >= 1 && !timeExpired;
 
 	function renderStatusText() {
@@ -179,7 +194,8 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 					{players.map((p, index) => {
 						const isMe = p.userId === userId;
 						const pIsLast = !!p.isLast;
-						const showLast = isMe ? pIsLast : pIsLast && settings.showOtherIsLast;
+						const showLast = !timeExpired && (isMe ? pIsLast : pIsLast && settings.showOtherIsLast);
+						const isWinner = timeExpired && index === 0;
 
 						return (
 							<View
@@ -187,22 +203,23 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 								style={[
 									styles.board_row,
 									showLast && styles.board_row_last,
-									isMe && !showLast && styles.board_row_me,
+									isWinner && styles.board_row_winner,
+									isMe && !showLast && !isWinner && styles.board_row_me,
 								]}
 							>
-								<Text style={[styles.board_cell, styles.rank_col, styles.rank_text, showLast && styles.board_cell_dark]}>
+								<Text style={[styles.board_cell, styles.rank_col, styles.rank_text, (showLast || isWinner) && styles.board_cell_dark]}>
 									{index + 1}
 								</Text>
 								<View style={[styles.name_col, styles.name_cell_inner]}>
-									<Text style={[styles.board_cell, showLast && styles.board_cell_dark]} numberOfLines={1}>
+									<Text style={[styles.board_cell, (showLast || isWinner) && styles.board_cell_dark]} numberOfLines={1}>
 										{p.name}
 									</Text>
-									{isMe && <View style={[styles.me_dot, showLast && styles.me_dot_dark]} />}
+									{isMe && <View style={[styles.me_dot, (showLast || isWinner) && styles.me_dot_dark]} />}
 								</View>
-								<Text style={[styles.board_cell, styles.credit_col, styles.credit_cell_text, showLast && styles.board_cell_dark]}>
+								<Text style={[styles.board_cell, styles.credit_col, styles.credit_cell_text, (showLast || isWinner) && styles.board_cell_dark]}>
 									{isMe || settings.showOtherCredits ? p.credit : '--'}
 								</Text>
-								<Text style={[styles.board_cell, styles.score_col, styles.score_cell_text, showLast && styles.board_cell_dark]}>
+								<Text style={[styles.board_cell, styles.score_col, styles.score_cell_text, (showLast || isWinner) && styles.board_cell_dark]}>
 									{isMe || settings.showOtherScores ? formatScore(displayScore(p)) : '--'}
 								</Text>
 							</View>
@@ -389,6 +406,9 @@ const styles = StyleSheet.create({
 	},
 	board_row_last: {
 		backgroundColor: last_green,
+	},
+	board_row_winner: {
+		backgroundColor: '#FFD700',
 	},
 	board_row_me: {
 		backgroundColor: 'rgba(255,255,255,0.06)',
