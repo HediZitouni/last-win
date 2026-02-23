@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
 import { background_grey, button_grey, button_grey_press, footer_grey, last_green } from '../../utils/common-styles';
-import { getGameByIdApi, startGameApi, updatePlayerNameApi } from '../games/games.service';
+import { startGameApi, updatePlayerNameApi } from '../games/games.service';
 import { Game } from '../games/games.type';
+import { getSocket } from '../../utils/socket';
 
 interface WaitingRoomProps {
 	game: Game;
@@ -10,8 +11,6 @@ interface WaitingRoomProps {
 	onGameStarted: (game: Game) => void;
 	onLeave: () => void;
 }
-
-const POLL_INTERVAL = 3000;
 
 function formatTimeLimit(seconds: number | null): string {
 	if (seconds === null) return 'Illimitée';
@@ -34,29 +33,21 @@ function settingsLine(label: string, value: string): React.ReactNode {
 const WaitingRoom = ({ game, userId, onGameStarted, onLeave }: WaitingRoomProps) => {
 	const [currentGame, setCurrentGame] = useState<Game>(game);
 	const isCreator = currentGame.createdBy === userId;
-	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const currentPlayer = currentGame.players.find((p) => p.userId === userId);
 	const [playerName, setPlayerName] = useState(currentPlayer?.name ?? '');
 	const [nameEditing, setNameEditing] = useState(false);
 
 	useEffect(() => {
-		intervalRef.current = setInterval(async () => {
-			try {
-				const updated = await getGameByIdApi(currentGame.id);
-				setCurrentGame(updated);
-				if (updated.status === 'started') {
-					if (intervalRef.current) clearInterval(intervalRef.current);
-					onGameStarted(updated);
-				}
-			} catch (e) {
-				console.log(e);
+		const socket = getSocket();
+		socket.emit('join-game', currentGame.id);
+		socket.on('game-updated', (updated: Game) => {
+			setCurrentGame(updated);
+			if (updated.status === 'started') {
+				onGameStarted(updated);
 			}
-		}, POLL_INTERVAL);
-
-		return () => {
-			if (intervalRef.current) clearInterval(intervalRef.current);
-		};
+		});
+		return () => { socket.off('game-updated'); };
 	}, [currentGame.id]);
 
 	async function handleStart() {
