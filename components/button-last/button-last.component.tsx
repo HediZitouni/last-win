@@ -109,13 +109,13 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 	}
 
 	const sortedPlayers = useMemo(() => {
-		if (!settings.showOtherScores) return players;
+		if (!settings.showOtherScores && !timeExpired) return players;
 		return [...players].sort((a, b) => {
 			const scoreA = a.isLast ? a.score + elapsed : a.score;
 			const scoreB = b.isLast ? b.score + elapsed : b.score;
 			return scoreB - scoreA;
 		});
-	}, [players, elapsed, settings.showOtherScores]);
+	}, [players, elapsed, settings.showOtherScores, timeExpired]);
 
 	if (!player) return null;
 
@@ -226,10 +226,10 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 									{isMe && <View style={[styles.me_dot, (showLast || isWinner) && styles.me_dot_dark]} />}
 								</View>
 								<Text style={[styles.board_cell, styles.credit_col, styles.credit_cell_text, (showLast || isWinner) && styles.board_cell_dark]}>
-									{isMe || settings.showOtherCredits ? p.credit : '--'}
+									{isMe || settings.showOtherCredits || timeExpired ? p.credit : '--'}
 								</Text>
 								<Text style={[styles.board_cell, styles.score_col, styles.score_cell_text, (showLast || isWinner) && styles.board_cell_dark]}>
-									{isMe || settings.showOtherScores ? formatScore(displayScore(p)) : '--'}
+									{isMe || settings.showOtherScores || timeExpired ? formatScore(displayScore(p)) : '--'}
 								</Text>
 							</View>
 						);
