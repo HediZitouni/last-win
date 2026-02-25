@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import { View, StyleSheet, Text, Pressable, ScrollView } from 'react-native';
 import { background_grey, button_grey, button_grey_press, footer_grey, last_green } from '../../utils/common-styles';
 import { getPlayersApi, setLastApi } from '../games/games.service';
@@ -108,10 +108,19 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 		return score.toLocaleString('fr-FR');
 	}
 
+	const sortedPlayers = useMemo(() => {
+		if (!settings.showOtherScores) return players;
+		return [...players].sort((a, b) => {
+			const scoreA = a.isLast ? a.score + elapsed : a.score;
+			const scoreB = b.isLast ? b.score + elapsed : b.score;
+			return scoreB - scoreA;
+		});
+	}, [players, elapsed, settings.showOtherScores]);
+
 	if (!player) return null;
 
 	const isLast = !timeExpired && !!player.isLast;
-	const lastPlayer = !timeExpired ? players.find((p) => p.isLast) : undefined;
+	const lastPlayer = !timeExpired ? sortedPlayers.find((p) => p.isLast) : undefined;
 	const canAct = !isLast && player.credit >= 1 && !timeExpired;
 
 	function renderStatusText() {
@@ -191,7 +200,7 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 					<Text style={[styles.board_header_cell, styles.score_col]}>Score</Text>
 				</View>
 				<ScrollView style={styles.board_scroll}>
-					{players.map((p, index) => {
+					{sortedPlayers.map((p, index) => {
 						const isMe = p.userId === userId;
 						const pIsLast = !!p.isLast;
 						const showLast = !timeExpired && (isMe ? pIsLast : pIsLast && settings.showOtherIsLast);
