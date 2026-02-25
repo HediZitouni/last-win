@@ -111,17 +111,17 @@ const WaitingRoom = ({ game, userId, onGameStarted, onLeave }: WaitingRoomProps)
 
 			<View style={settingsStyles.container}>
 				<Text style={settingsStyles.title}>Règles</Text>
-				{settingsLine('Joueurs max', String(currentGame.settings.maxPlayers))}
-				{settingsLine('Crédits', String(currentGame.settings.maxCredits))}
-				{settingsLine('Durée', formatTimeLimit(currentGame.settings.timeLimitSeconds))}
-				{settingsLine('Voir crédits des autres', currentGame.settings.showOtherCredits ? 'Oui' : 'Non')}
-				{settingsLine('Voir scores des autres', currentGame.settings.showOtherScores ? 'Oui' : 'Non')}
-				{settingsLine('Voir qui est Last', currentGame.settings.showOtherIsLast ? 'Oui' : 'Non')}
+				{settingsLine('Joueurs max', String(currentGame.settings?.maxPlayers ?? '?'))}
+				{settingsLine('Crédits', String(currentGame.settings?.maxCredits ?? '?'))}
+				{settingsLine('Durée', formatTimeLimit(currentGame.settings?.timeLimitSeconds ?? null))}
+				{settingsLine('Voir crédits des autres', currentGame.settings?.showOtherCredits ? 'Oui' : 'Non')}
+				{settingsLine('Voir scores des autres', currentGame.settings?.showOtherScores ? 'Oui' : 'Non')}
+				{settingsLine('Voir qui est Last', currentGame.settings?.showOtherIsLast ? 'Oui' : 'Non')}
 			</View>
 
 			<View style={styles.playersSection}>
 				<Text style={styles.playersTitle}>
-					Joueurs ({currentGame.players.length}/{currentGame.settings.maxPlayers})
+					Joueurs ({currentGame.players.length}/{currentGame.settings?.maxPlayers ?? '?'})
 				</Text>
 				<ScrollView style={styles.playersList}>
 					{currentGame.players.map((player) => (

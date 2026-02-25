@@ -25,7 +25,7 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
 		expirationTimers.current = [];
 		const now = Math.round(Date.now() / 1000);
 		for (const g of gameList) {
-			if (g.status !== 'started' || !g.startedAt || !g.settings.timeLimitSeconds) continue;
+			if (g.status !== 'started' || !g.startedAt || !g.settings?.timeLimitSeconds) continue;
 			const remaining = (g.startedAt + g.settings.timeLimitSeconds) - now;
 			if (remaining > 0) {
 				const timer = setTimeout(() => forceRender((n) => n + 1), remaining * 1000);
@@ -169,10 +169,10 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
 					)}
 					{games.map((game) => {
 						const isStarted = game.status === 'started';
-						const isExpired = isStarted
-							&& game.startedAt !== null
-							&& game.settings.timeLimitSeconds !== null
-							&& Math.round(Date.now() / 1000) >= game.startedAt + game.settings.timeLimitSeconds;
+					const isExpired = isStarted
+						&& game.startedAt !== null
+						&& game.settings?.timeLimitSeconds != null
+						&& Math.round(Date.now() / 1000) >= game.startedAt + game.settings.timeLimitSeconds;
 						const playerCount = game.players?.length ?? 0;
 						return (
 							<Pressable

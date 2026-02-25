@@ -10,6 +10,7 @@ export function getSocket(): Socket {
 		socket = io(BASE_URL, {
 			transports: ['websocket'],
 			autoConnect: true,
+			path: '/lastwin/socket.io/',
 		});
 	}
 	return socket;
