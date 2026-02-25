@@ -17,27 +17,14 @@ function clamp(value: number, min: number, max: number): number {
 
 const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) => {
 	const [settings, setSettings] = useState<GameSettings>({ ...DEFAULT_SETTINGS, ...game.settings });
-	const [timeLimitEnabled, setTimeLimitEnabled] = useState(settings.timeLimitSeconds !== null);
 	const [saving, setSaving] = useState(false);
 
 	const [maxPlayersText, setMaxPlayersText] = useState(String(settings.maxPlayers));
 	const [maxCreditsText, setMaxCreditsText] = useState(String(settings.maxCredits));
-	const [timeLimitText, setTimeLimitText] = useState(String(settings.timeLimitSeconds ?? ''));
+	const [timeLimitText, setTimeLimitText] = useState(String(settings.timeLimitSeconds));
 
 	function updateSetting<K extends keyof GameSettings>(key: K, value: GameSettings[K]) {
 		setSettings((prev) => ({ ...prev, [key]: value }));
-	}
-
-	function handleTimeLimitToggle(enabled: boolean) {
-		setTimeLimitEnabled(enabled);
-		if (enabled) {
-			const defaultSeconds = 60;
-			setTimeLimitText(String(defaultSeconds));
-			updateSetting('timeLimitSeconds', defaultSeconds);
-		} else {
-			setTimeLimitText('');
-			updateSetting('timeLimitSeconds', null);
-		}
 	}
 
 	function handleBlurNumeric(text: string, min: number, max: number, setter: (v: string) => void, settingKey: keyof GameSettings) {
@@ -66,7 +53,9 @@ const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) =>
 		const cleaned = text.replace(/[^0-9]/g, '');
 		setTimeLimitText(cleaned);
 		const parsed = parseInt(cleaned, 10);
-		updateSetting('timeLimitSeconds', isNaN(parsed) ? null : parsed);
+		if (!isNaN(parsed)) {
+			updateSetting('timeLimitSeconds', parsed);
+		}
 	}
 
 	function handleTimeLimitBlur() {
@@ -145,32 +134,18 @@ const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) =>
 
 					<View style={styles.row}>
 						<View style={styles.rowLabel}>
-							<Text style={styles.rowTitle}>Durée limitée</Text>
+							<Text style={styles.rowTitle}>Durée (secondes)</Text>
 							<Text style={styles.rowHint}>La partie s'arrête automatiquement après le temps choisi</Text>
 						</View>
-						<Switch
-							value={timeLimitEnabled}
-							onValueChange={handleTimeLimitToggle}
-							trackColor={{ false: button_grey, true: last_green }}
-							thumbColor="white"
+						<TextInput
+							style={styles.numericInput}
+							keyboardType="number-pad"
+							value={timeLimitText}
+							onChangeText={handleTimeLimitChange}
+							onBlur={handleTimeLimitBlur}
+							maxLength={7}
 						/>
 					</View>
-
-					{timeLimitEnabled && (
-						<View style={styles.row}>
-							<View style={styles.rowLabel}>
-								<Text style={styles.rowTitle}>Durée (secondes)</Text>
-							</View>
-							<TextInput
-								style={styles.numericInput}
-								keyboardType="number-pad"
-								value={timeLimitText}
-								onChangeText={handleTimeLimitChange}
-								onBlur={handleTimeLimitBlur}
-								maxLength={7}
-							/>
-						</View>
-					)}
 				</View>
 
 				<View style={styles.section}>

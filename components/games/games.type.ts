@@ -20,7 +20,7 @@ export interface Player {
 export const DEFAULT_SETTINGS: GameSettings = {
 	maxPlayers: 10,
 	maxCredits: 10,
-	timeLimitSeconds: null,
+	timeLimitSeconds: 60,
 	showOtherCredits: true,
 	showOtherScores: true,
 	showOtherIsLast: true,
