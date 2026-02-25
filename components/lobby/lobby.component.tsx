@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import {
@@ -28,7 +29,12 @@ interface LobbyProps {
   onSelectGame: (game: Game) => void;
 }
 
+const NARROW_BREAKPOINT = 400;
+
 const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
+  const { width } = useWindowDimensions();
+  const isNarrow = width < NARROW_BREAKPOINT;
+
   const [games, setGames] = useState<Game[]>([]);
   const [newGameName, setNewGameName] = useState("");
   const [joinCode, setJoinCode] = useState("");
@@ -144,9 +150,9 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Rejoindre avec un code</Text>
-        <View style={styles.row}>
+        <View style={[styles.row, isNarrow && styles.rowVertical]}>
           <TextInput
-            style={styles.codeInput}
+            style={[styles.codeInput, isNarrow && styles.inputFullWidth]}
             placeholder="ABC123"
             placeholderTextColor="#666"
             value={joinCode}
@@ -161,6 +167,7 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
           <Pressable
             style={({ pressed }) => [
               styles.actionButton,
+              isNarrow && styles.actionButtonFullWidth,
               pressed && styles.actionButtonPressed,
             ]}
             onPress={handleJoinByCode}
@@ -173,9 +180,9 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Créer une partie</Text>
-        <View style={styles.row}>
+        <View style={[styles.row, isNarrow && styles.rowVertical]}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, isNarrow && styles.inputFullWidth]}
             placeholder="Nom de la partie"
             placeholderTextColor="#666"
             value={newGameName}
@@ -185,6 +192,7 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
           <Pressable
             style={({ pressed }) => [
               styles.actionButton,
+              isNarrow && styles.actionButtonFullWidth,
               pressed && styles.actionButtonPressed,
             ]}
             onPress={handleCreateGame}
@@ -295,6 +303,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
   },
+  rowVertical: {
+    flexDirection: "column",
+  },
+  inputFullWidth: {
+    flex: undefined,
+    width: "100%",
+  },
+  actionButtonFullWidth: {
+    width: "100%",
+    alignItems: "center" as const,
+  },
   input: {
     flex: 1,
     backgroundColor: footer_grey,
@@ -306,22 +325,25 @@ const styles = StyleSheet.create({
   },
   codeInput: {
     flex: 1,
+    minWidth: 0,
     backgroundColor: footer_grey,
     color: "white",
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 4,
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
-    letterSpacing: 4,
+    letterSpacing: 3,
     textAlign: "center",
   },
   actionButton: {
+    flexShrink: 0,
     backgroundColor: button_grey,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 4,
     justifyContent: "center",
+    minHeight: 44,
   },
   actionButtonPressed: {
     backgroundColor: button_grey_press,
