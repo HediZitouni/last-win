@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { View, StyleSheet, Text, Pressable, ScrollView } from 'react-native';
 import { background_grey, button_grey, button_grey_press, footer_grey, last_green } from '../../utils/common-styles';
 import { getPlayersApi, setLastApi } from '../games/games.service';
-import { Game, GameSettings, Player } from '../games/games.type';
+import { DEFAULT_SETTINGS, Game, GameSettings, Player } from '../games/games.type';
 import { getSocket } from '../../utils/socket';
 
 interface ButtonLastProps {
@@ -22,7 +22,7 @@ function formatCountdown(totalSeconds: number): string {
 }
 
 const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
-	const settings: GameSettings = game.settings;
+	const settings: GameSettings = game.settings ?? DEFAULT_SETTINGS;
 	const gameName = game.name;
 
 	const [player, setPlayer] = useState<Player | null>(null);

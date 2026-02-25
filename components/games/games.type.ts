@@ -17,6 +17,15 @@ export interface Player {
 	isLast?: boolean;
 }
 
+export const DEFAULT_SETTINGS: GameSettings = {
+	maxPlayers: 10,
+	maxCredits: 10,
+	timeLimitSeconds: null,
+	showOtherCredits: true,
+	showOtherScores: true,
+	showOtherIsLast: true,
+};
+
 export interface Game {
 	id: string;
 	name: string;

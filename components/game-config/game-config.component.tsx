@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch, TextInput } from 'react-native';
 import { background_grey, button_grey, footer_grey, last_green } from '../../utils/common-styles';
 import { updateGameSettingsApi } from '../games/games.service';
-import { Game, GameSettings } from '../games/games.type';
+import { DEFAULT_SETTINGS, Game, GameSettings } from '../games/games.type';
 
 interface GameConfigProps {
 	game: Game;
@@ -16,7 +16,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) => {
-	const [settings, setSettings] = useState<GameSettings>({ ...game.settings });
+	const [settings, setSettings] = useState<GameSettings>({ ...DEFAULT_SETTINGS, ...game.settings });
 	const [timeLimitEnabled, setTimeLimitEnabled] = useState(settings.timeLimitSeconds !== null);
 	const [saving, setSaving] = useState(false);
 
