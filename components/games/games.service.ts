@@ -26,6 +26,12 @@ export async function joinGameByCodeApi(code: string, userId: string): Promise<G
 	return game;
 }
 
+export async function createRestartGameApi(gameId: string, userId: string): Promise<Game> {
+	const response = await callApi(HTTP_METHODS.POST, `games/${gameId}/restart`, { userId });
+	const game: Game = await response.json();
+	return game;
+}
+
 export async function rejoinGameApi(gameId: string, userId: string): Promise<Game> {
 	const response = await callApi(HTTP_METHODS.PUT, `games/${gameId}/rejoin`, { userId });
 	const game: Game = await response.json();

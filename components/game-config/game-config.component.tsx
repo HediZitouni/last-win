@@ -103,14 +103,18 @@ const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) =>
 							<Text style={styles.rowTitle}>Joueurs max</Text>
 							<Text style={styles.rowHint}>Nombre maximum de joueurs dans la partie</Text>
 						</View>
-						<TextInput
-							style={styles.numericInput}
-							keyboardType="number-pad"
-							value={maxPlayersText}
-							onChangeText={(t) => handleChangeNumeric(t, setMaxPlayersText, 'maxPlayers')}
-							onBlur={() => handleBlurNumeric(maxPlayersText, 2, 50, setMaxPlayersText, 'maxPlayers')}
-							maxLength={2}
-						/>
+						{game.restartedFromGameId ? (
+							<Text style={styles.numericInputReadOnly}>{settings.maxPlayers}</Text>
+						) : (
+							<TextInput
+								style={styles.numericInput}
+								keyboardType="number-pad"
+								value={maxPlayersText}
+								onChangeText={(t) => handleChangeNumeric(t, setMaxPlayersText, 'maxPlayers')}
+								onBlur={() => handleBlurNumeric(maxPlayersText, 2, 50, setMaxPlayersText, 'maxPlayers')}
+								maxLength={2}
+							/>
+						)}
 					</View>
 
 					<View style={styles.row}>
@@ -294,6 +298,16 @@ const styles = StyleSheet.create({
 		marginTop: 2,
 	},
 	numericInput: {
+		backgroundColor: background_grey,
+		color: 'white',
+		fontSize: 18,
+		fontWeight: '600',
+		textAlign: 'center',
+		width: 80,
+		paddingVertical: 8,
+		borderRadius: 8,
+	},
+	numericInputReadOnly: {
 		backgroundColor: background_grey,
 		color: 'white',
 		fontSize: 18,

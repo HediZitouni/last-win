@@ -37,4 +37,5 @@ export interface Game {
 	settings: GameSettings;
 	configured: boolean;
 	startedAt: number | null;
+	restartedFromGameId?: string;
 }

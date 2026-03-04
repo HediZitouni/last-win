@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import { View, StyleSheet, Text, Pressable, ScrollView } from 'react-native';
 import { background_grey, button_grey, button_grey_press, footer_grey, last_green } from '../../utils/common-styles';
-import { getPlayersApi, setLastApi } from '../games/games.service';
+import { getPlayersApi, setLastApi, createRestartGameApi } from '../games/games.service';
 import { DEFAULT_SETTINGS, Game, GameSettings, Player } from '../games/games.type';
 import { getSocket } from '../../utils/socket';
 
@@ -10,6 +10,7 @@ interface ButtonLastProps {
 	gameId: string;
 	game: Game;
 	onLeaveGame: () => void;
+	onSelectGame: (game: Game) => void;
 }
 
 function formatCountdown(totalSeconds: number): string {
@@ -21,7 +22,7 @@ function formatCountdown(totalSeconds: number): string {
 	return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
 }
 
-const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
+const ButtonLast = ({ userId, gameId, game, onLeaveGame, onSelectGame }: ButtonLastProps) => {
 	const settings: GameSettings = game.settings ?? DEFAULT_SETTINGS;
 	const gameName = game.name;
 
@@ -38,6 +39,8 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 	}
 
 	const [timeExpired, setTimeExpired] = useState(isGameExpired);
+	const [restartLoading, setRestartLoading] = useState(false);
+	const isHost = game.createdBy === userId;
 
 	const applyPlayers = useCallback((allPlayers: Player[]) => {
 		setElapsed(0);
@@ -62,8 +65,14 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 		socket.on('last-updated', (updatedPlayers: Player[]) => {
 			applyPlayers(updatedPlayers);
 		});
-		return () => { socket.off('last-updated'); };
-	}, [gameId, applyPlayers]);
+		socket.on('game-restarted', (newGame: Game) => {
+			onSelectGame(newGame);
+		});
+		return () => {
+			socket.off('last-updated');
+			socket.off('game-restarted');
+		};
+	}, [gameId, applyPlayers, onSelectGame]);
 
 	useEffect(() => {
 		if (timeExpired) {
@@ -93,6 +102,18 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 		const now = Math.round(Date.now() / 1000);
 		const endTime = game.startedAt! + settings.timeLimitSeconds!;
 		return Math.max(0, endTime - now);
+	}
+
+	async function handleRestartGame() {
+		if (restartLoading || !isHost) return;
+		setRestartLoading(true);
+		try {
+			const newGame = await createRestartGameApi(game.id, userId);
+			onSelectGame(newGame);
+		} catch (e) {
+			console.log(e);
+			setRestartLoading(false);
+		}
 	}
 
 	async function addCount() {
@@ -176,18 +197,35 @@ const ButtonLast = ({ userId, gameId, game, onLeaveGame }: ButtonLastProps) => {
 			</View>
 
 			<View style={styles.action_area}>
-				<Pressable
-					style={({ pressed }) => [
-						styles.action_button,
-						!canAct && styles.action_button_disabled,
-						pressed && canAct && styles.action_button_pressed,
-					]}
-					onPress={addCount}
-					disabled={!canAct}
-				>
-					<Text style={styles.action_text}>LAST !</Text>
-				</Pressable>
-				{!canAct && !isLast && !timeExpired && player.credit < 1 && (
+				{!timeExpired && (
+					<Pressable
+						style={({ pressed }) => [
+							styles.action_button,
+							!canAct && styles.action_button_disabled,
+							pressed && canAct && styles.action_button_pressed,
+						]}
+						onPress={addCount}
+						disabled={!canAct}
+					>
+						<Text style={styles.action_text}>LAST !</Text>
+					</Pressable>
+				)}
+				{timeExpired && isHost && (
+					<Pressable
+						style={({ pressed }) => [
+							styles.action_button,
+							restartLoading && styles.action_button_disabled,
+							pressed && !restartLoading && styles.action_button_pressed,
+						]}
+						onPress={handleRestartGame}
+						disabled={restartLoading}
+					>
+						<Text style={styles.action_text}>
+							{restartLoading ? 'Création...' : 'Relancer une partie'}
+						</Text>
+					</Pressable>
+				)}
+				{!canAct && !isLast && !timeExpired && player?.credit < 1 && (
 					<Text style={styles.no_credit_hint}>Plus de crédits</Text>
 				)}
 			</View>
