@@ -52,6 +52,25 @@ export async function __retrieveVersion() {
 	}
 }
 
+const DEFAULT_PLAYER_NAME_KEY = 'defaultPlayerName';
+
+export async function __storeDefaultPlayerName(name: string) {
+	try {
+		await AsyncStorage.setItem(DEFAULT_PLAYER_NAME_KEY, name);
+	} catch (error) {
+		console.log('error during saving defaultPlayerName');
+	}
+}
+
+export async function __retrieveDefaultPlayerName(): Promise<string | null> {
+	try {
+		return await AsyncStorage.getItem(DEFAULT_PLAYER_NAME_KEY);
+	} catch (error) {
+		console.log('error during retrieving defaultPlayerName');
+		return null;
+	}
+}
+
 export async function __resetStore() {
 	try {
 		await AsyncStorage.clear();

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import {
   background_grey,
   button_grey,
@@ -17,6 +18,10 @@ import {
 import { getSocket } from "../../utils/socket";
 import { startGameApi, updatePlayerNameApi } from "../games/games.service";
 import { Game } from "../games/games.type";
+import {
+  __retrieveDefaultPlayerName,
+  __storeDefaultPlayerName,
+} from "../users/users.store";
 
 interface WaitingRoomProps {
   game: Game;
@@ -94,11 +99,41 @@ const WaitingRoom = ({
         trimmed,
       );
       setCurrentGame(updated);
+      await __storeDefaultPlayerName(trimmed);
       setNameEditing(false);
     } catch (e) {
       console.log(e);
     }
   }
+
+  const defaultPseudoAppliedRef = useRef(false);
+  useEffect(() => {
+    const name = currentPlayer?.name ?? "";
+    if (!/^Joueur_\d+$/.test(name)) {
+      defaultPseudoAppliedRef.current = false;
+      return;
+    }
+    let cancelled = false;
+    __retrieveDefaultPlayerName().then((defaultPseudo) => {
+      if (cancelled || !defaultPseudo?.trim()) return;
+      defaultPseudoAppliedRef.current = true;
+      updatePlayerNameApi(currentGame.id, userId, defaultPseudo.trim())
+        .then((updated) => {
+          if (!cancelled) {
+            setCurrentGame(updated);
+            setPlayerName(defaultPseudo.trim());
+          }
+        })
+        .catch(() => {});
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentGame.id, currentPlayer?.userId]);
+
+  useEffect(() => {
+    if (currentGame.id) defaultPseudoAppliedRef.current = false;
+  }, [currentGame.id]);
 
   return (
     <View style={styles.container}>
@@ -134,9 +169,17 @@ const WaitingRoom = ({
           </View>
         ) : (
           <Pressable onPress={() => setNameEditing(true)}>
-            <Text style={styles.nameDisplay}>
-              {currentPlayer?.name ?? "..."}
-            </Text>
+            <View style={styles.nameDisplayRow}>
+              <Text style={styles.nameDisplay}>
+                {currentPlayer?.name ?? "..."}
+              </Text>
+              <Ionicons
+                name="pencil"
+                size={18}
+                color={last_green}
+                style={styles.nameEditIcon}
+              />
+            </View>
           </Pressable>
         )}
       </View>
@@ -250,11 +293,19 @@ const styles = StyleSheet.create({
     color: "#aaa",
     marginBottom: 6,
   },
+  nameDisplayRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   nameDisplay: {
     fontSize: 22,
     fontWeight: "600",
     color: last_green,
     paddingVertical: 8,
+  },
+  nameEditIcon: {
+    marginLeft: 2,
   },
   nameEditRow: {
     flexDirection: "row",
