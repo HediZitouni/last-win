@@ -102,7 +102,6 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
 
   async function handleCreateGame() {
     const name = newGameName.trim();
-    if (!name) return;
     try {
       const game = await createGameApi(name, userId);
       setNewGameName("");
@@ -183,7 +182,7 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
         <View style={[styles.row, isNarrow && styles.rowVertical]}>
           <TextInput
             style={[styles.input, isNarrow && styles.inputFullWidth]}
-            placeholder="Nom de la partie"
+            placeholder="Nom de la partie (optionnel)"
             placeholderTextColor="#666"
             value={newGameName}
             onChangeText={setNewGameName}
@@ -229,7 +228,7 @@ const Lobby = ({ userId, onSelectGame }: LobbyProps) => {
                 onPress={() => handleSelectGame(game)}
               >
                 <View>
-                  <Text style={styles.gameName}>{game.name}</Text>
+                  <Text style={styles.gameName}>{game.name || 'Partie'}</Text>
                   <Text style={styles.gameMeta}>
                     {playerCount} joueur{playerCount > 1 ? "s" : ""}
                   </Text>

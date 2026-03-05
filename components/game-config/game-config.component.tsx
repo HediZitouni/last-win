@@ -93,7 +93,7 @@ const GameConfig = ({ game, userId, onConfigured, onLeave }: GameConfigProps) =>
 			</View>
 
 			<ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-				<Text style={styles.gameName}>{game.name}</Text>
+				<Text style={styles.gameName}>{game.name || 'Partie'}</Text>
 
 				<View style={styles.section}>
 					<Text style={styles.sectionTitle}>Joueurs & Crédits</Text>

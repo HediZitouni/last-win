@@ -138,7 +138,7 @@ const WaitingRoom = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{currentGame.name}</Text>
+        <Text style={styles.title}>{currentGame.name || 'Partie'}</Text>
         <Text style={styles.code}>{currentGame.code}</Text>
         <Text style={styles.subtitle}>
           Partagez ce code pour inviter des joueurs

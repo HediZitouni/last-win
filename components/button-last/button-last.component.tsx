@@ -24,7 +24,7 @@ function formatCountdown(totalSeconds: number): string {
 
 const ButtonLast = ({ userId, gameId, game, onLeaveGame, onSelectGame }: ButtonLastProps) => {
 	const settings: GameSettings = game.settings ?? DEFAULT_SETTINGS;
-	const gameName = game.name;
+	const gameName = game.name || 'Partie';
 
 	const [player, setPlayer] = useState<Player | null>(null);
 	const [players, setPlayers] = useState<Player[]>([]);
